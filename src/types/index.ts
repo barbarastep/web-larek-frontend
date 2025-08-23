@@ -13,24 +13,46 @@ export interface ICustomer {
   phone: string
   address: string
 }
-
 export interface IProductData {
   products: IProduct[];
   preview: string | null;
+  getProducts(): IProduct[];
+  setProducts(products: IProduct[]): void;
+  getSelectedProduct(): IProduct | null;
+  setSelectedProduct(product: IProduct): void;
 }
 
-export type TCatalogMain = Omit<IProduct, 'description'>;
+export interface ICartModel {
+  addProduct(product: IProduct): void;
+  setQuantity(productId: string, qty: number): void;
+  removeProduct(productId: string): void;
+  count(): number;
+  total(): number;
+  getItems(): CartItem[];
+  has(productId: string): boolean;
+  clear(): void;
+  buildOrderItems(): string[];
+}
 
-export type TCartItemSummary = Pick<IProduct, 'id' | 'title' | 'price'>;
+export interface ICustomerModel {
+  update(data: Partial<ICustomer>): void;
+  getData(): ICustomer;
+  validate(): string[];
+  clear(): void;
+}
 
-export type TCartItemWithQty = TCartItemSummary & { qty: number };
+export type CatalogMain = Omit<IProduct, 'description'>;
 
-export type TCartPayModal = Pick<ICustomer, 'payment' | 'address'>;
+export type CartItemSummary = Pick<IProduct, 'id' | 'title' | 'price'>;
 
-export type TCartContactModal = Pick<ICustomer, 'email' | 'phone'>;
+export type CartItemWithQty = CartItemSummary & { qty: number };
 
-export type TOrderPayload = ICustomer & { items: string[] };
+export type CartPayModal = Pick<ICustomer, 'payment' | 'address'>;
 
-export type TOrderResponse = { total: number };
+export type CartContactModal = Pick<ICustomer, 'email' | 'phone'>;
 
-export type TCartItem = { product: IProduct; qty: number };
+export type OrderPayload = ICustomer & { items: string[] };
+
+export type OrderResponse = { total: number };
+
+export type CartItem = { product: IProduct; qty: number };
