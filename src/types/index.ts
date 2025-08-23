@@ -56,3 +56,49 @@ export type OrderPayload = ICustomer & { items: string[] };
 export type OrderResponse = { total: number };
 
 export type CartItem = { product: IProduct; qty: number };
+
+export interface IApiClient {
+  get<T = unknown>(uri: string): Promise<T>;
+  post<T = unknown>(uri: string, data: object, method?: 'POST' | 'PUT' | 'DELETE'): Promise<T>;
+}
+
+export interface ICatalogView {
+  render(list: CatalogMain[]): void;
+  onAddToCart(handler: (productId: string) => void): void;
+  onOpenDetails(handler: (productId: string) => void): void;
+}
+
+export interface ICartView {
+  render(lines: CartItemWithQty[], total: number, count: number): void;
+  onRemove(handler: (productId: string) => void): void;
+  onQtyChange(handler: (productId: string, qty: number) => void): void;
+  onCheckout(handler: () => void): void;
+}
+
+export interface ICheckoutPayView {
+  setData(data: CartPayModal): void;
+  onSubmit(handler: (data: CartPayModal) => void): void;
+}
+
+export interface ICheckoutContactView {
+  setData(data: CartContactModal): void;
+  onSubmit(handler: (data: CartContactModal) => void): void;
+}
+
+export const Events = {
+  CatalogUpdated: 'catalog:updated',
+  PreviewChanged: 'catalog:previewChanged',
+  CartChanged: 'cart:changed',
+  OrderCreated: 'order:created',
+  OrderError: 'order:error',
+  CustomerUpdated: 'customer:updated',
+} as const;
+
+export interface IEvents {
+  on(event: string | RegExp, cb: (data?: unknown) => void): void;
+  off(event: string | RegExp, cb: (data?: unknown) => void): void;
+  emit(event: string, data?: unknown): void;
+  trigger(event: string, context?: object): (data?: object) => void;
+}
+
+export type ApiListResponse<T> = { total: number; items: T[] };
