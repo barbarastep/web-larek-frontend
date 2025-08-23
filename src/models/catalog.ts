@@ -1,30 +1,30 @@
-import type { Iproduct, CartItem, Icustomer } from '../types';
+import type { IProduct, TCartItem, ICustomer } from '../types';
 
 class Catalog {
-  private products: Iproduct[] = [];
-  private selectedProduct: Iproduct | null = null;
+  private products: IProduct[] = [];
+  private selectedProduct: IProduct | null = null;
 
-  getProducts(): Iproduct[] {
+  getProducts(): IProduct[] {
     return this.products;
   }
 
-  setProducts(products: Iproduct[]): void {
+  setProducts(products: IProduct[]): void {
     this.products = products;
   }
 
-  getSelectedProduct(): Iproduct | null {
+  getSelectedProduct(): IProduct | null {
     return this.selectedProduct;
   }
 
-  setSelectedProduct(product: Iproduct): void {
+  setSelectedProduct(product: IProduct): void {
     this.selectedProduct = product;
   }
 }
 
 class Cart {
-  private items: CartItem[] = [];
+  private items: TCartItem[] = [];
 
-  addProduct(prod: Iproduct): void {
+  addProduct(prod: IProduct): void {
     const item = this.items.find(i => i.product.id === prod.id);
     if (item) item.qty += 1;
     else this.items.push({ product: prod, qty: 1 });
