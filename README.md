@@ -84,25 +84,19 @@ export type CatalogMain = Omit<IProduct, 'description'>;
 Краткие данные товара в корзине
 
 ```
-export type CartItemSummary = Pick<IProduct, 'id' | 'title' | 'price'>;
-```
-
-Позиция корзины: товар + количество
-
-```
-export type CartItemView = TCartItemSummary & { qty: number };
+export type BasketItemSummary = Pick<IProduct, 'id' | 'title' | 'price'>;
 ```
 
 Данные формы оплаты
 
 ```
-export type CartPayModal = Pick<ICustomer, 'payment' | 'address'>;
+export type CheckoutPayModalData = Pick<ICustomer, 'payment' | 'address'>;
 ```
 
 Данные формы контактов
 
 ```
-export type CartContactModal = Pick<ICustomer, 'email' | 'phone'>;
+export type CheckoutContactModalData = Pick<ICustomer, 'email' | 'phone'>;
 ```
 
 Данные для создания заказа
@@ -117,11 +111,6 @@ export type OrderPayload = ICustomer & { items: string[] };
 export type OrderResponse = { total: number };
 ```
 
-Элемент корзины
-
-```
-export type CartItem = { product: IProduct; qty: number };
-```
 
 ## Архитектура приложения
 
@@ -139,22 +128,19 @@ export type CartItem = { product: IProduct; qty: number };
 - `post` - принимает объект с данными, которые будут преобразованы в JSON и отправлены в теле запроса на эндпоинт, указанный в параметрах метода. По умолчанию выполняется `POST`-запрос, но можно передать третий параметр, чтобы использовать PUT или DELETE.
 
 #### Класс EventEmitter
-Брокер событий: позволяет подписываться и инициировать события между слоями (используется презентером). \
-Основные методы, реализуемые классом описаны интерфейсом `IEvents`:
+Брокер событий: позволяет подписываться и инициировать события между слоями (используется презентером). Основные методы, реализуемые классом описаны интерфейсом `IEvents`:
 - `on` - подписка на событие
 - `emit` - инициализация события
 - `trigger` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие
 
 ### Слой данных
 
-#### Класс IProductData
-
-Класс отвечает за хранение и логику работы с данными товаров. \
-Конструктор принимает инстанс брокера событий.
+#### Класс Catalog
+Класс отвечает за хранение и логику работы с данными товаров (реализует интерфейс `IProductData`). Конструктор принимает инстанс брокера событий.
 
 Поля:
-- _products: IProduct[] — массив товаров
-- _preview: string | null — id товара, выбранного для просмотра в модальном окне
+- productsData: IProduct[] — массив товаров
+- previewId: string | null — id товара, выбранного для просмотра в модальном окне
 - events: IEvents — экземпляр `EventEmitter` для оповещения об изменениях
 
 Методы:
@@ -162,39 +148,212 @@ export type CartItem = { product: IProduct; qty: number };
 - setProducts(products: IProduct[]): void — сохраняет массив товаров и генерирует событие обновления
 - getSelectedProduct(): IProduct | null — возвращает выбранный товар; если не выбран — null
 - setSelectedProduct(product: IProduct): void — сохраняет выбранный товар (по его id) и генерирует событие изменения выбора
+- setSelectedProductId(id: string): void — сохраняет выбор по переданному id
 
-#### Класс ICartModel
-Класс отвечает за хранение и логику работы с товарами в корзине. \
-Конструктор принимает инстанс брокера событий.
+#### Класс Basket
+Класс отвечает за хранение и логику работы с товарами в корзине (реализует интерфейс `IBasketModel`). Конструктор принимает инстанс брокера событий.
 
 Поля:
-- _items: CartItem[] — позиции корзины
+- items: IProduct[] — массив товаров, добавленных в корзину
 - events: IEvents — экземпляр `EventEmitter` для оповещения об изменениях
 
 Методы:
-- addProduct(product: IProduct): void — добавляет товар; если уже есть, увеличивает количество
-- setQuantity(productId: string, qty: number): void — задаёт количество; qty <= 0 удаляет товар
+- addProduct(product: IProduct): void — добавляет товар в корзину; если он уже есть, повторно не добавляется
 - removeProduct(productId: string): void — удаляет товар по id
-- count(): number — возвращает суммарное количество единиц товаров (сумма qty)
-- total(): number — возвращает итоговую стоимость (учитывает qty, пропускает товары с price == null)
-- getItems(): CartItem[] — возвращает список позиций корзины
+- getItems(): IProduct[] — возвращает список товаров в корзине
 - has(productId: string): boolean — проверяет наличие товара по id
 - clear(): void — очищает корзину
-- buildOrderItems(): string[] — формирует список id для заказа, дублируя id по количеству
+- count(): number — возвращает количество уникальных товаров в корзине
+- total(): number — возвращает итоговую стоимость всех товаров; товары с price == null пропускаются
+- buildOrderItems(): string[] — формирует список id для заказа, по одному на каждый товар
 
-#### Класс ICustomerModel
-Класс отвечает за хранение и логику работы с данными пользователя. \
-Конструктор принимает инстанс брокера событий.
+#### Класс Customer
+Класс отвечает за хранение и логику работы с данными пользователя (реализует интерфейс `ICustomerModel`). Конструктор принимает инстанс брокера событий.
 
 Поля:
-- _payment — выбранный способ оплаты
-- _email — введённый email
-- _phone — введённый номер телефона
-- _address — введённый адрес
-- events: IEvents — экземпляр EventEmitter для оповещения об изменениях
+- payment — выбранный способ оплаты
+- email — введённый адрес электронной почты
+- phone — введённый номер телефона
+- address — введённый адрес доставки
+- events: IEvents — экземпляр `EventEmitter` для оповещения об изменениях
 
 Методы:
 - update(data: Partial<ICustomer>): void — обновляет данные (полностью или частично)
 - getData(): ICustomer — возвращает текущие данные пользователя
 - validate(): string[] — проверяет корректность адреса; пустой массив = ошибок нет
 - clear(): void — сбрасывает все поля в пустые значения
+
+### Классы представления
+Все классы представления отвечают за отображение внутри контейнера (DOM-элемент) передаваемых в них данных.
+
+#### Modal
+Класс управляет модальным окном: показывает внутри себя любое содержимое и закрывается по кнопке. Используется как общий контейнер для всех модалок.
+
+Поля:
+- container: HTMLElement
+- closeButton: HTMLButtonElement
+- contentElement: HTMLElement
+
+Методы:
+- setContent(content: HTMLElement) — вставляет содержимое
+- onClose(handler: () => void) — сообщает о нажатии кнопки закрытия
+
+#### ProductModal (карточка товара в модалке)
+Отвечает за отображение карточки товара в модальном окне. Показывает информацию о товаре и кнопку «В корзину». Сообщает, когда пользователь хочет добавить товар.
+
+Поля:
+- addButton: HTMLButtonElement
+
+Методы:
+- setData(data: HTMLElement) — рендерит карточку товара
+- onAddToBasket(handler: () => void) — сообщает о клике «В корзину»
+
+#### BasketModal (корзина)
+Представляет корзину пользователя. Показывает список выбранных товаров, общую стоимость и кнопку «Оформить». Сообщает о клике для перехода к оформлению.
+
+Поля:
+- listElement: HTMLElement — список товаров
+- checkoutButton: HTMLButtonElement — кнопка «Оформить»
+- totalElement: HTMLElement — сумма заказа
+
+Методы:
+- setItems(items: HTMLElement[]) — вставляет список товаров
+- setTotal(value: number) — обновляет сумму
+- onCheckout(handler: () => void) — сообщает о клике «Оформить»
+
+#### CheckoutPayModal (форма оплаты и адреса)
+Форма для выбора способа оплаты и ввода адреса доставки. Отображает кнопки для способов оплаты и поле для адреса. Передает данные при нажатии «Далее».
+
+Поля:
+- buttonCard: HTMLButtonElement
+- buttonCash: HTMLButtonElement
+- addressInput: HTMLInputElement
+- submitButton: HTMLButtonElement
+
+Методы:
+- setData(data: CheckoutPayModalData) — заполняет данные формы
+- getData(): CheckoutPayModalData — возвращает введённые данные
+- onSubmit(handler: (data: CheckoutPayModalData) => void) — сообщает о клике «Далее»
+
+#### CheckoutContactModal (форма контактов)
+Форма для ввода контактных данных: email и телефона. Передает данные при нажатии кнопки «Оплатить».
+
+Поля:
+- emailInput: HTMLInputElement
+- phoneInput: HTMLInputElement
+- submitButton: HTMLButtonElement
+
+Методы:
+- setData(data: CheckoutContactModalData) — заполняет данные формы
+- getData(): CheckoutContactModalData — возвращает введённые данные
+- onSubmit(handler: (data: CheckoutContactModalData) => void) — сообщает о клике «Оплатить»
+
+#### SuccessModal (подтверждение заказа)
+Окно подтверждения заказа. Показывает сообщение об успешной оплате и сумму покупки. Сообщает о клике «За новыми покупками!».
+
+Поля:
+- messageElement: HTMLElement — сумма заказа
+- continueButton: HTMLButtonElement — кнопка «За новыми покупками!»
+
+Методы:
+- setData(total: number) — обновляет текст с суммой
+- onContinue(handler: () => void) — сообщает о клике по кнопке
+
+#### Header (шапка сайта с корзиной)
+Отображает шапку сайта. Включает кнопку корзины и счётчик товаров. Сообщает о клике по корзине.
+
+Поля:
+- basketButton: HTMLButtonElement
+- counterElement: HTMLElement
+
+Методы:
+- setCounter(value: number) — обновляет число товаров
+- onBasketClick(handler: () => void) — сообщает о клике по корзине
+
+#### Gallery (список карточек товаров)
+Представляет список карточек товаров в каталоге. Отвечает только за рендеринг карточек в контейнер.
+
+Поля:
+- catalogElement: HTMLElement
+
+Методы:
+- setCatalog(items: HTMLElement[]) — вставляет карточки каталога
+
+#### CatalogCardView (карточка товара в списке)
+Карточка товара в списке. Показывает основные данные товара и реагирует на клик по карточке.
+
+Поля:
+- container: HTMLButtonElement
+
+Методы:
+- render(data: ProductCardCommon) — рендерит карточку
+- onClick(handler: (id: string) => void) — сообщает о клике по карточке
+
+#### BasketItemView (карточка товара в корзине)
+Карточка товара в корзине. Показывает название, цену и кнопку «Удалить». Сообщает о клике по кнопке удаления.
+
+Поля:
+- container: HTMLLIElement
+- deleteBtn: HTMLButtonElement
+
+Методы:
+- render(data: ProductCardCommon & { index: number }) — рендерит строку корзины
+- onRemove(handler: (id: string) => void) — сообщает о клике «Удалить»
+
+#### ProductCardBase (базовый шаблон карточки товара)
+Базовый шаблон карточки товара. Содержит общие элементы (заголовок, цену, категорию, изображение, описание). Используется как основа для других карточек, чтобы не дублировать код.
+
+Поля:
+- titleElement: HTMLElement
+- categoryElement: HTMLElement
+- priceElement: HTMLElement
+- imageElement: HTMLImageElement
+- descriptionElement: HTMLElement
+
+Методы:
+- render(data: ProductCardCommon) — подставляет данные в карточку
+
+#### FormView (базовый класс формы)
+Базовый шаблон формы. Позволяет отображать поля, кнопку отправки и ошибки. Используется как основа для форм оформления заказа.
+
+Поля:
+- formElement: HTMLFormElement
+- submitButton: HTMLButtonElement
+- errorElement: HTMLElement | null
+
+Методы:
+- setData(data: Record<string, string>) — заполняет поля формы
+- getData(): Record<string, string> — возвращает введённые значения
+- setErrors(errors: string[]) — отображает ошибки
+- onSubmit(handler: (data: Record<string, string>) => void) — сообщает о клике кнопки отправки
+
+### Слой коммуникации
+#### Класс AppApi
+Принимает в конструктор экземпляр класса `Api` и предоставляет методы, реализующие взаимодействие с бэкендом сервиса.
+
+## Взаимодействие компонентов
+Код, описывающий взаимодействие представления и данных между собой находится в файле `index.ts`, выполняющем роль презентера. Взаимодействие осуществляется за счет событий генерируемых с помощью брокера событий и обработчиков этих событий, описанных в `index.ts`. В `index.ts` сначала создаются экземпляры всех необходимых классов, а затем настраивается обработка событий.
+
+**Список всех событий, которые могут генерироваться в системе:**
+
+*События изменения данных (генерируются классами моделями данных)*
+- `catalog:updated` — каталог товаров загружен/обновлён.
+- `catalog:previewChanged` — выбран товар для просмотра.
+- `basket:changed` — состав корзины изменился (добавление/удаление/очистка).
+- `customer:updated` — данные покупателя обновлены/очищены.
+- `order:created` — заказ успешно создан (получен `total` с сервера).
+- `order:error` — ошибка при создании заказа.
+
+*События, возникающие при взаимодействии пользователя с интерфейсом (генерируются классами, отвечающими за представление)*
+- `header:basketClick` — клик по кнопке корзины.
+- `gallery:cardClick` — клик по карточке товара (передаёт `productId`).
+- `modal:close` — закрытие модального окна.
+- `basket:addItem` — клик «В корзину» в превью товара (передаёт `productId`).
+- `basket:removeItem` — удаление позиции из корзины (передаёт `productId`).
+- `basket:checkout` — клик «Оформить» в корзине.
+- `checkout:paymentSelect` — выбор способа оплаты (`'card' | 'online'`).
+- `checkout:payValidate` — проверка правильности заполнения формы оплаты (кнопка «Далее» активируется/деактивируется).
+- `checkout:paySubmit` — сабмит формы оплаты/адреса (передаёт `{ payment, address }`).
+- `checkout:contactValidate` — проверка правильности заполнения контактной формы (кнопка «Оплатить» активируется/деактивируется).
+- `checkout:contactSubmit` — сабмит формы контактов (передаёт `{ email, phone }`).
+- `success:continue` — клик «За новыми покупками!`.
