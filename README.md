@@ -158,13 +158,13 @@ export type OrderResponse = { total: number };
 - events: IEvents — экземпляр `EventEmitter` для оповещения об изменениях
 
 Методы:
-- addProduct(product: IProduct): void — добавляет товар в корзину; если он уже есть, повторно не добавляется
+- addItem(product: IProduct): void — добавляет товар в корзину; если он уже есть, повторно не добавляется
 - removeProduct(productId: string): void — удаляет товар по id
 - getItems(): IProduct[] — возвращает список товаров в корзине
-- has(productId: string): boolean — проверяет наличие товара по id
-- clear(): void — очищает корзину
-- count(): number — возвращает количество уникальных товаров в корзине
-- total(): number — возвращает итоговую стоимость всех товаров; товары с price == null пропускаются
+- hasInBasket(productId: string): boolean — проверяет наличие товара по id
+- clearBasket(): void — очищает корзину
+- getCount(): number — возвращает количество уникальных товаров в корзине
+- getTotal(): number — возвращает итоговую стоимость всех товаров; товары с price == null пропускаются
 - buildOrderItems(): string[] — формирует список id для заказа, по одному на каждый товар
 
 #### Класс Customer
@@ -178,10 +178,10 @@ export type OrderResponse = { total: number };
 - events: IEvents — экземпляр `EventEmitter` для оповещения об изменениях
 
 Методы:
-- update(data: Partial<ICustomer>): void — обновляет данные (полностью или частично)
+- updateData(data: Partial<ICustomer>): void — обновляет данные (полностью или частично)
 - getData(): ICustomer — возвращает текущие данные пользователя
-- validate(): string[] — проверяет корректность адреса; пустой массив = ошибок нет
-- clear(): void — сбрасывает все поля в пустые значения
+- validateData(): CustomerErrors — возвращает объект ошибок по полям (пустой объект = ошибок нет)
+- clearData(): void — сбрасывает все поля в пустые значения
 
 ### Классы представления
 Все классы представления отвечают за отображение внутри контейнера (DOM-элемент) передаваемых в них данных.
@@ -198,31 +198,22 @@ export type OrderResponse = { total: number };
 - setContent(content: HTMLElement) — вставляет содержимое
 - onClose(handler: () => void) — сообщает о нажатии кнопки закрытия
 
-#### ProductModal (карточка товара в модалке)
-Отвечает за отображение карточки товара в модальном окне. Показывает информацию о товаре и кнопку «В корзину». Сообщает, когда пользователь хочет добавить товар.
+#### FormView (базовый класс формы)
+Базовый шаблон формы. Позволяет отображать поля, кнопку отправки и ошибки. Используется как основа для форм оформления заказа.
 
 Поля:
-- addButton: HTMLButtonElement
+- formElement: HTMLFormElement
+- submitButton: HTMLButtonElement
+- errorElement: HTMLElement | null
 
 Методы:
-- setData(data: HTMLElement) — рендерит карточку товара
-- onAddToBasket(handler: () => void) — сообщает о клике «В корзину»
+- setData(data: Record<string, string>) — заполняет поля формы
+- getData(): Record<string, string> — возвращает введённые значения
+- setErrors(errors: Record<string, string>) — отображает ошибки
+- onSubmit(handler: (data: Record<string, string>) => void) — сообщает о клике кнопки отправки
 
-#### BasketModal (корзина)
-Представляет корзину пользователя. Показывает список выбранных товаров, общую стоимость и кнопку «Оформить». Сообщает о клике для перехода к оформлению.
-
-Поля:
-- listElement: HTMLElement — список товаров
-- checkoutButton: HTMLButtonElement — кнопка «Оформить»
-- totalElement: HTMLElement — сумма заказа
-
-Методы:
-- setItems(items: HTMLElement[]) — вставляет список товаров
-- setTotal(value: number) — обновляет сумму
-- onCheckout(handler: () => void) — сообщает о клике «Оформить»
-
-#### CheckoutPayModal (форма оплаты и адреса)
-Форма для выбора способа оплаты и ввода адреса доставки. Отображает кнопки для способов оплаты и поле для адреса. Передает данные при нажатии «Далее».
+#### CheckoutPay (форма оплаты и адреса)
+Форма для выбора способа оплаты и ввода адреса доставки.  Наследуется от FormView, поэтому использует общую логику работы с формами. Отображает кнопки для способов оплаты и поле для адреса. Передает данные при нажатии «Далее».
 
 Поля:
 - buttonCard: HTMLButtonElement
@@ -235,8 +226,8 @@ export type OrderResponse = { total: number };
 - getData(): CheckoutPayModalData — возвращает введённые данные
 - onSubmit(handler: (data: CheckoutPayModalData) => void) — сообщает о клике «Далее»
 
-#### CheckoutContactModal (форма контактов)
-Форма для ввода контактных данных: email и телефона. Передает данные при нажатии кнопки «Оплатить».
+#### CheckoutContact (форма контактов)
+Форма для ввода контактных данных: email и телефона. Наследуется от FormView, поэтому использует общую логику работы с формами. Передает данные при нажатии кнопки «Оплатить».
 
 Поля:
 - emailInput: HTMLInputElement
@@ -248,7 +239,65 @@ export type OrderResponse = { total: number };
 - getData(): CheckoutContactModalData — возвращает введённые данные
 - onSubmit(handler: (data: CheckoutContactModalData) => void) — сообщает о клике «Оплатить»
 
-#### SuccessModal (подтверждение заказа)
+#### ProductCardBase (базовый шаблон карточки товара)
+Базовый шаблон карточки товара. Содержит общие элементы (название и цену). Используется как основа для других карточек, чтобы не дублировать код.
+
+Поля:
+- titleElement: HTMLElement
+- priceElement: HTMLElement
+
+Методы:
+- render(data: ProductCardCommon) — подставляет данные в карточку
+
+
+#### CatalogCardView (карточка товара в списке)
+Карточка товара в списке. Наследуется от ProductCardBase, поэтому использует базовую разметку карточки. Показывает основные данные товара и реагирует на клик по карточке.
+
+Поля:
+- container: HTMLButtonElement
+
+Методы:
+- render(data: ProductCardCommon) — рендерит карточку
+- onCardClick(handler: (id: string) => void) — сообщает о клике по карточке
+
+#### ProductModal (карточка товара в модалке)
+Отвечает за отображение карточки товара в модальном окне. Наследуется от ProductCardBase, поэтому использует базовую разметку карточки. Показывает информацию о товаре и кнопку «В корзину». Сообщает, когда пользователь хочет добавить товар.
+
+Поля:
+- addButton: HTMLButtonElement
+
+Методы:
+- setData(data: HTMLElement) — рендерит карточку товара
+- onAddItem(handler: () => void) — сообщает о клике «В корзину»
+
+#### BasketItemView (карточка товара в корзине)
+Карточка товара в корзине. Наследуется от ProductCardBase, поэтому использует базовую разметку карточки. Показывает информацию о товаре и кнопку «Удалить». Сообщает о клике по кнопке удаления.
+
+Поля:
+- container: HTMLLIElement
+- deleteBtn: HTMLButtonElement
+
+Методы:
+- render(data: ProductCardCommon & { index: number }) — рендерит строку корзины
+- onRemove(handler: (id: string) => void) — сообщает о клике «Удалить»
+
+
+#### Basket (корзина)
+Представляет корзину пользователя. Показывает список выбранных товаров, общую стоимость и кнопку «Оформить». Сообщает о клике для перехода к оформлению.
+
+Поля:
+- listElement: HTMLElement — список товаров
+- checkoutButton: HTMLButtonElement — кнопка «Оформить»
+- totalElement: HTMLElement — сумма заказа
+
+Методы:
+- setItems(items: HTMLElement[]) — вставляет список товаров
+- setTotal(value: number) — обновляет сумму
+- onCheckout(handler: () => void) — сообщает о клике «Оформить»
+
+
+
+#### Success (подтверждение заказа)
 Окно подтверждения заказа. Показывает сообщение об успешной оплате и сумму покупки. Сообщает о клике «За новыми покупками!».
 
 Поля:
@@ -256,7 +305,7 @@ export type OrderResponse = { total: number };
 - continueButton: HTMLButtonElement — кнопка «За новыми покупками!»
 
 Методы:
-- setData(total: number) — обновляет текст с суммой
+- setTotal(total: number) — обновляет текст с суммой
 - onContinue(handler: () => void) — сообщает о клике по кнопке
 
 #### Header (шапка сайта с корзиной)
@@ -279,53 +328,6 @@ export type OrderResponse = { total: number };
 Методы:
 - setCatalog(items: HTMLElement[]) — вставляет карточки каталога
 
-#### CatalogCardView (карточка товара в списке)
-Карточка товара в списке. Показывает основные данные товара и реагирует на клик по карточке.
-
-Поля:
-- container: HTMLButtonElement
-
-Методы:
-- render(data: ProductCardCommon) — рендерит карточку
-- onClick(handler: (id: string) => void) — сообщает о клике по карточке
-
-#### BasketItemView (карточка товара в корзине)
-Карточка товара в корзине. Показывает название, цену и кнопку «Удалить». Сообщает о клике по кнопке удаления.
-
-Поля:
-- container: HTMLLIElement
-- deleteBtn: HTMLButtonElement
-
-Методы:
-- render(data: ProductCardCommon & { index: number }) — рендерит строку корзины
-- onRemove(handler: (id: string) => void) — сообщает о клике «Удалить»
-
-#### ProductCardBase (базовый шаблон карточки товара)
-Базовый шаблон карточки товара. Содержит общие элементы (заголовок, цену, категорию, изображение, описание). Используется как основа для других карточек, чтобы не дублировать код.
-
-Поля:
-- titleElement: HTMLElement
-- categoryElement: HTMLElement
-- priceElement: HTMLElement
-- imageElement: HTMLImageElement
-- descriptionElement: HTMLElement
-
-Методы:
-- render(data: ProductCardCommon) — подставляет данные в карточку
-
-#### FormView (базовый класс формы)
-Базовый шаблон формы. Позволяет отображать поля, кнопку отправки и ошибки. Используется как основа для форм оформления заказа.
-
-Поля:
-- formElement: HTMLFormElement
-- submitButton: HTMLButtonElement
-- errorElement: HTMLElement | null
-
-Методы:
-- setData(data: Record<string, string>) — заполняет поля формы
-- getData(): Record<string, string> — возвращает введённые значения
-- setErrors(errors: string[]) — отображает ошибки
-- onSubmit(handler: (data: Record<string, string>) => void) — сообщает о клике кнопки отправки
 
 ### Слой коммуникации
 #### Класс AppApi
