@@ -19,18 +19,17 @@ export type CatalogMain = Omit<IProduct, 'description'>;
 export type BasketItemSummary = Pick<IProduct, 'id' | 'title' | 'price'>;
 export type CheckoutPayModalData = Pick<ICustomer, 'payment' | 'address'>;
 export type CheckoutContactModalData = Pick<ICustomer, 'email' | 'phone'>;
-export type OrderPayload = ICustomer & { items: string[] };
+export type OrderPayload = ICustomer & { items: string[]; total: number };
 export type OrderResponse = { total: number };
 export type CustomerErrors = Record<string, string>;
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 // Интерфейсы модели данных
 export interface IProductData {
   products: IProduct[];
   preview: string | null;
-
   getProducts(): IProduct[];
   setProducts(products: IProduct[]): void;
-
   getSelectedProduct(): IProduct | null;
   setSelectedProduct(product: IProduct): void;
   setSelectedProductId(id: string): void;
@@ -55,12 +54,12 @@ export interface ICustomerModel {
 }
 
 // API-клиент
-export interface IApiClient {
-  get<T = unknown>(uri: string): Promise<T>;
-  post<T = unknown>(
+export interface IApi {
+  get<T>(uri: string): Promise<T>;
+  post<T>(
     uri: string,
     data: object,
-    method?: 'POST' | 'PUT' | 'DELETE'
+    method?: ApiPostMethods
   ): Promise<T>;
 }
 
@@ -68,7 +67,7 @@ export interface IApiClient {
 // Каталог (список карточек)
 export interface ICatalogView {
   render(list: CatalogMain[]): void;
-  onOpenDetails(handler: (productId: string) => void): void; // клик по карточке
+  onOpenDetails(handler: (productId: string) => void): void;
 }
 
 // Корзина
@@ -115,13 +114,6 @@ export const Events = {
   CheckoutContactSubmit: 'checkout:contactSubmit',
   SuccessContinue: 'success:continue',
 } as const;
-
-export interface IEvents {
-  on(event: string | RegExp, cb: (data?: unknown) => void): void;
-  off(event: string | RegExp, cb: (data?: unknown) => void): void;
-  emit(event: string, data?: unknown): void;
-  trigger(event: string, context?: object): (data?: object) => void;
-}
 
 // Ответ списков
 export type ApiListResponse<T> = { total: number; items: T[] };
