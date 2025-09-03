@@ -76,3 +76,33 @@ appApi
 //   const ok = addr.value.trim().length > 0;
 //   orderForm.setErrors(ok ? {} : { address: 'Необходимо указать адрес' });
 // });
+
+// Проверка ProductCardBase - удачно
+// import { ProductCardBase } from './components/ProductCardBase';
+// import { IProduct } from './types';
+
+// // Найдём шаблон и клонируем
+// const tpl = document.querySelector<HTMLTemplateElement>('#card-catalog');
+// if (tpl) {
+//   const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+//   // создаём карточку
+//   const card = new ProductCardBase(node);
+
+//   // подставляем тестовые данные
+//   const product: IProduct = {
+//     id: 'test-1',
+//     title: 'Тестовый товар',
+//     description: 'Описание не используется в базе',
+//     image: '',
+//     category: 'test',
+//     price: 1234,
+//   };
+
+//   // рендерим и вставляем на страницу
+//   const rendered = card.render(product);
+//   document.querySelector('.gallery')?.appendChild(rendered);
+
+//   console.log('ProductCardBase id:', card.getId());
+//   console.log('Element:', card.getElement());
+// }
