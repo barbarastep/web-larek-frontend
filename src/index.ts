@@ -129,3 +129,31 @@ appApi
 
 // // Проверка клика
 // card.onCardClick((id) => console.log('[card click]', id));
+
+// Проверка ProductModal - удачно
+import { ProductModal } from './components/ProductModal';
+
+// 1. Берём шаблон карточки для модалки
+const tpl = document.querySelector<HTMLTemplateElement>('#card-preview')!;
+const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+// 2. Тестовые данные продукта
+const product = {
+  id: 'test-42',
+  title: 'Тестовый товар',
+  description: 'Описание для модалки',
+  category: 'тест',
+  image: '/Subtract.svg',
+  price: 500,
+};
+
+// 3. Создаём экземпляр ProductModal
+const modalCard = new ProductModal(node);
+
+// 4. Рендерим и добавляем в DOM (например, прямо в body)
+document.body.appendChild(modalCard.render(product));
+
+// 5. Проверяем реакцию на «В корзину»
+modalCard.onAddItem(() => {
+  console.log('[ProductModal] add to basket clicked', product.id);
+});
