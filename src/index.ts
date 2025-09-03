@@ -30,7 +30,7 @@ appApi
   });
 
 
-// // Проверка открытия модального окна - удачно
+// Проверка открытия модального окна - удачно
 // import { Modal } from './components/Modal';
 // import { Events } from './types';
 
@@ -49,3 +49,30 @@ appApi
 //   modal.setContent(test);
 // };
 // document.body.appendChild(btn);
+
+// Проверка открытия формы - удачно
+// import { FormView } from './components/FormView';
+
+// // взять содержимое шаблона
+// const orderTemplate = document.getElementById('order') as HTMLTemplateElement;
+// const orderFormEl = orderTemplate.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+
+// // вставим форму в DOM (например, прямо в body для проверки)
+// document.body.appendChild(orderFormEl);
+
+// // создать FormView
+// const orderForm = new FormView(orderFormEl);
+
+// // подписаться на submit
+// orderForm.onSubmit((data) => {
+//   console.log('Form submitted with data:', data);
+// });
+
+// // протестировать setData
+// orderForm.setData({ address: 'СПб Восстания 1' });
+
+// const addr = orderFormEl.querySelector<HTMLInputElement>('[name="address"]')!;
+// addr.addEventListener('input', () => {
+//   const ok = addr.value.trim().length > 0;
+//   orderForm.setErrors(ok ? {} : { address: 'Необходимо указать адрес' });
+// });
