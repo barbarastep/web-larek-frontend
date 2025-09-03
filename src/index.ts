@@ -106,3 +106,26 @@ appApi
 //   console.log('ProductCardBase id:', card.getId());
 //   console.log('Element:', card.getElement());
 // }
+
+// Проверка CatalogCardView - удачно
+// import { CatalogCardView } from './components/CatalogCardView';
+// import type { IProduct } from './types';
+
+// const gallery = document.querySelector<HTMLElement>('.gallery')!;
+// const tpl = document.querySelector<HTMLTemplateElement>('#card-catalog')!;
+// const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+// const product: IProduct = {
+//   id: 'test-1',
+//   title: 'Тестовый товар',
+//   category: 'другое',
+//   image: '/Subtract.svg', // или полный URL до картинки
+//   description: 'не используется в каталоге',
+//   price: 1234,
+// };
+
+// const card = new CatalogCardView(node);
+// gallery.appendChild(card.render(product));
+
+// // Проверка клика
+// card.onCardClick((id) => console.log('[card click]', id));
