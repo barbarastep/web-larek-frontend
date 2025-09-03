@@ -28,3 +28,24 @@ appApi
   .catch(err => {
     console.error('Failed to load products:', err);
   });
+
+
+// // Проверка открытия модального окна - удачно
+// import { Modal } from './components/Modal';
+// import { Events } from './types';
+
+// const modal = new Modal(document.getElementById('modal-container')!, events);
+
+// // Подпишись на события
+// events.on(Events.ModalClose, () => console.log('[EVENT] ModalClose fired'));
+// modal.onClose(() => console.log('[LOCAL] Modal closed'));
+
+// // Тест: показать модалку с текстом
+// const btn = document.createElement('button');
+// btn.textContent = 'Open modal';
+// btn.onclick = () => {
+//   const test = document.createElement('div');
+//   test.textContent = 'Hello from modal!';
+//   modal.setContent(test);
+// };
+// document.body.appendChild(btn);
