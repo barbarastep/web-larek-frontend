@@ -184,3 +184,29 @@ appApi
 // basketItemView.onRemove((id) => {
 //   console.log('Удалён товар с id:', id);
 // });
+
+// Проверка BasketView - удачно
+// import { BasketView } from './components/BasketView';
+
+// const basketTemplate = document.querySelector<HTMLTemplateElement>('#basket')!;
+// const basketEl = basketTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+// const basketView = new BasketView(basketEl);
+
+// // Подставим пару тестовых элементов
+// const item1 = document.createElement('li');
+// item1.textContent = 'Товар 1';
+// const item2 = document.createElement('li');
+// item2.textContent = 'Товар 2';
+
+// // Заполним корзину
+// basketView.setItems([item1, item2]);
+// basketView.setTotal(1234);
+
+// // Обработчик кнопки «Оформить»
+// basketView.onCheckout(() => {
+//   console.log('Checkout clicked!');
+// });
+
+// // Добавим корзину на страницу для наглядности
+// document.body.appendChild(basketEl);
