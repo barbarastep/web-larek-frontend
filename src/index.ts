@@ -131,29 +131,56 @@ appApi
 // card.onCardClick((id) => console.log('[card click]', id));
 
 // Проверка ProductModal - удачно
-import { ProductModal } from './components/ProductModal';
+// import { ProductModal } from './components/ProductModal';
 
-// 1. Берём шаблон карточки для модалки
-const tpl = document.querySelector<HTMLTemplateElement>('#card-preview')!;
-const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+// // 1. Берём шаблон карточки для модалки
+// const tpl = document.querySelector<HTMLTemplateElement>('#card-preview')!;
+// const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
 
-// 2. Тестовые данные продукта
-const product = {
-  id: 'test-42',
-  title: 'Тестовый товар',
-  description: 'Описание для модалки',
-  category: 'тест',
-  image: '/Subtract.svg',
-  price: 500,
-};
+// // 2. Тестовые данные продукта
+// const product = {
+//   id: 'test-42',
+//   title: 'Тестовый товар',
+//   description: 'Описание для модалки',
+//   category: 'тест',
+//   image: '/Subtract.svg',
+//   price: 500,
+// };
 
-// 3. Создаём экземпляр ProductModal
-const modalCard = new ProductModal(node);
+// // 3. Создаём экземпляр ProductModal
+// const modalCard = new ProductModal(node);
 
-// 4. Рендерим и добавляем в DOM (например, прямо в body)
-document.body.appendChild(modalCard.render(product));
+// // 4. Рендерим и добавляем в DOM (например, прямо в body)
+// document.body.appendChild(modalCard.render(product));
 
-// 5. Проверяем реакцию на «В корзину»
-modalCard.onAddItem(() => {
-  console.log('[ProductModal] add to basket clicked', product.id);
-});
+// // 5. Проверяем реакцию на «В корзину»
+// modalCard.onAddItem(() => {
+//   console.log('[ProductModal] add to basket clicked', product.id);
+// });
+
+// Проверка BasketItemView - удачно
+// import { BasketItemView } from './components/BasketItemView';
+
+// // 1. Берём шаблон
+// const tpl = document.getElementById('card-basket') as HTMLTemplateElement;
+// if (!tpl) throw new Error('Template card-basket not found');
+
+// // 2. Клонируем его содержимое
+// const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+// // 3. Создаём view
+// const basketItemView = new BasketItemView(li);
+
+// // 4. Рендерим тестовые данные
+// const testData = {
+//   id: 'test-1',
+//   title: 'Тестовый товар',
+//   price: 1234,
+//   index: 1,
+// };
+// document.body.appendChild(basketItemView.renderItem(testData));
+
+// // 5. Подписываемся на удаление
+// basketItemView.onRemove((id) => {
+//   console.log('Удалён товар с id:', id);
+// });
