@@ -256,3 +256,30 @@ appApi
 //     phone: '+71234567890',
 //   });
 // }
+
+// Проверка Success - успешно
+
+// import { Success } from './components/Success';
+
+// // 1. Берём шаблон success
+// const tpl = document.querySelector<HTMLTemplateElement>('#success');
+// if (!tpl) throw new Error('#success template not found');
+
+// // 2. Клонируем его содержимое
+// const fragment = tpl.content.cloneNode(true) as HTMLElement;
+// const successEl = fragment.querySelector<HTMLElement>('.order-success');
+// if (!successEl) throw new Error('.order-success not found');
+
+// // 3. Создаём Success
+// const successView = new Success(successEl);
+
+// // 4. Задаём сумму
+// successView.setTotal(153250);
+
+// // 5. Подписываемся на кнопку
+// successView.onContinue(() => {
+//   console.log('Continue button clicked!');
+// });
+
+// // 6. Вставляем в DOM (например, в body)
+// document.body.appendChild(successEl);
