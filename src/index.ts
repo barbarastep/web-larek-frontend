@@ -233,4 +233,26 @@ appApi
 // });
 
 // // Проверим getData()
-// console.log('👉 getData():', checkoutPay.getData());
+// console.log('getData():', checkoutPay.getData());
+
+// Проверка CheckoutContact - удачно
+// import { CheckoutContact } from './components/CheckoutContact';
+
+// const contactTemplate = document.querySelector<HTMLTemplateElement>('#contacts');
+// if (contactTemplate) {
+//   const formElement = contactTemplate.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+//   document.body.appendChild(formElement);
+
+//   const contactForm = new CheckoutContact(formElement);
+
+//   // слушаем submit
+//   contactForm.onSubmit((data) => {
+//     console.log('Contact form submitted:', data);
+//   });
+
+//   // для проверки подставим сразу данные
+//   contactForm.setData({
+//     email: 'test@test.ru',
+//     phone: '+71234567890',
+//   });
+// }
