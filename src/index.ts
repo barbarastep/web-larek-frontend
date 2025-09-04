@@ -296,3 +296,27 @@ appApi
 
 // // Проверка: счетчик
 // header.setCounter(3); // должен показать "3" в .header__basket-counter
+
+// Проверка Gallery - успешно
+import { Gallery } from './components/Gallery';
+
+const galleryRoot = document.querySelector<HTMLElement>('main.gallery');
+if (!galleryRoot) throw new Error('gallery root not found');
+
+// создаём экземпляр
+const gallery = new Gallery(galleryRoot);
+
+// берём шаблон
+const tpl = document.getElementById('card-catalog') as HTMLTemplateElement;
+if (!tpl) throw new Error('card-catalog template not found');
+
+// клонируем несколько карточек для теста
+const demoCards: HTMLElement[] = [];
+for (let i = 0; i < 3; i++) {
+  const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  node.querySelector('.card__title')!.textContent = `Тестовая карточка #${i + 1}`;
+  demoCards.push(node);
+}
+
+// рендерим в каталог
+gallery.setCatalog(demoCards);
