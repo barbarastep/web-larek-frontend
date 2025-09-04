@@ -17,6 +17,7 @@ import { BasketItemView } from './components/BasketItemView';
 import { CheckoutPay } from './components/CheckoutPay';
 import { CheckoutContact } from './components/CheckoutContact';
 import { Success } from './components/Success';
+import { Events, IProduct } from './types';
 
 // Инициализация моделей и API
 const events: IEvents = new EventEmitter();
@@ -56,7 +57,6 @@ function cloneTemplate(template: HTMLTemplateElement): HTMLElement {
 // Представления
 const modal = new Modal(modalContainer, events);
 const header = new Header(headerElement);
-const gallery = new Gallery(galleryElement);
 
 const makeCatalogCard = () => new CatalogCardView(cloneTemplate(templateCatalogCard));
 const makeProductModal = () => new ProductModal(cloneTemplate(templateProductModal));
@@ -65,6 +65,28 @@ const makeBasketView = () => new BasketView(cloneTemplate(templateBasket));
 const makeCheckoutPay = () => new CheckoutPay(cloneTemplate(templateOrder) as HTMLFormElement);
 const makeCheckoutContact = () => new CheckoutContact(cloneTemplate(templateContacts) as HTMLFormElement);
 const makeSuccess = () => new Success(cloneTemplate(templateSuccess));
+
+// Подготовка контейнера списка и галереи
+const galleryRoot = document.querySelector<HTMLElement>('main.gallery');
+if (!galleryRoot) throw new Error('Gallery root <main class="gallery"> not found');
+const gallery = new Gallery(galleryRoot);
+
+// Рендер каталога при обновлении данных
+events.on(Events.CatalogUpdated, (payload?: unknown) => {
+  const products = (payload as IProduct[]) ?? catalog.getProducts();
+
+  const template = document.getElementById('card-catalog') as HTMLTemplateElement | null;
+  if (!template) throw new Error('Template #card-catalog not found');
+
+  const items = products.map(product => {
+    const element = template.content.firstElementChild?.cloneNode(true) as HTMLElement;
+    if (!element) throw new Error('#card-catalog content is empty');
+    const card = new CatalogCardView(element);
+    return card.render(product);
+  });
+
+  gallery.setCatalog(items);
+})
 
 // Загрузка каталога
 // appApi
