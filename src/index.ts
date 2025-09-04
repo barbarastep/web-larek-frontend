@@ -283,3 +283,16 @@ appApi
 
 // // 6. Вставляем в DOM (например, в body)
 // document.body.appendChild(successEl);
+
+// // Проверка Header - успешно
+// import { Header } from './components/Header';
+
+// const header = new Header(document.querySelector('.header')!);
+
+// // Проверка: клик по корзине
+// header.onBasketClick(() => {
+//   console.log('Basket button clicked!');
+// });
+
+// // Проверка: счетчик
+// header.setCounter(3); // должен показать "3" в .header__basket-counter
