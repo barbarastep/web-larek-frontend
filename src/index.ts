@@ -1,4 +1,4 @@
-// Импорты стилей, моделей и API
+// Импорты стилей, моделей, API и view-классов
 import './scss/styles.scss';
 import { Catalog } from './components/Catalog';
 import { Basket } from './components/Basket';
@@ -7,6 +7,16 @@ import { EventEmitter, IEvents } from './components/base/events';
 import { Api } from './components/base/api';
 import { AppApi } from './components/AppApi';
 import { API_URL } from './utils/constants';
+import { Modal } from './components/Modal';
+import { Header } from './components/Header';
+import { Gallery } from './components/Gallery';
+import { BasketView } from './components/BasketView';
+import { CatalogCardView } from './components/CatalogCardView';
+import { ProductModal } from './components/ProductModal';
+import { BasketItemView } from './components/BasketItemView';
+import { CheckoutPay } from './components/CheckoutPay';
+import { CheckoutContact } from './components/CheckoutContact';
+import { Success } from './components/Success';
 
 // Инициализация моделей и API
 const events: IEvents = new EventEmitter();
@@ -16,13 +26,53 @@ const customer = new Customer(events);
 const baseApi = new Api(API_URL);
 const appApi = new AppApi(baseApi);
 
+// DOM-контейнеры
+const modalContainer = document.getElementById('modal-container') as HTMLElement;
+const headerElement = document.querySelector('.header') as HTMLElement;
+const galleryElement = document.querySelector('.gallery') as HTMLElement;
+
+// Шаблоны
+const templateCatalogCard = document.getElementById('card-catalog') as HTMLTemplateElement;
+const templateProductModal = document.getElementById('card-preview') as HTMLTemplateElement;
+const templateBasket = document.getElementById('basket') as HTMLTemplateElement;
+const templateBasketItem = document.getElementById('card-basket') as HTMLTemplateElement;
+const templateOrder = document.getElementById('order') as HTMLTemplateElement;
+const templateContacts = document.getElementById('contacts') as HTMLTemplateElement;
+const templateSuccess = document.getElementById('success') as HTMLTemplateElement;
+
+// Проверка на месте ли узлы
+console.assert(!!modalContainer, 'modalContainer not found');
+console.assert(!!headerElement, 'headerElement not found');
+console.assert(!!galleryElement, 'galleryElement not found');
+console.assert(!!templateCatalogCard && !!templateProductModal && !!templateBasket && !!templateBasketItem && !!templateOrder && !!templateContacts && !!templateSuccess, 'Some templates not found');
+
+// Клонирование шаблонов
+function cloneTemplate(template: HTMLTemplateElement): HTMLElement {
+  const node = template.content.firstElementChild?.cloneNode(true);
+  if (!(node instanceof HTMLElement)) throw new Error('Template is empty or invalid');
+  return node;
+};
+
+// Представления
+const modal = new Modal(modalContainer, events);
+const header = new Header(headerElement);
+const gallery = new Gallery(galleryElement);
+
+const makeCatalogCard = () => new CatalogCardView(cloneTemplate(templateCatalogCard));
+const makeProductModal = () => new ProductModal(cloneTemplate(templateProductModal));
+const makeBasketItem = () => new BasketItemView(cloneTemplate(templateBasketItem));
+const makeBasketView = () => new BasketView(cloneTemplate(templateBasket));
+const makeCheckoutPay = () => new CheckoutPay(cloneTemplate(templateOrder) as HTMLFormElement);
+const makeCheckoutContact = () => new CheckoutContact(cloneTemplate(templateContacts) as HTMLFormElement);
+const makeSuccess = () => new Success(cloneTemplate(templateSuccess));
+
 // Загрузка каталога
-appApi
-  .getProducts()
-  .then(items => {
-    catalog.setProducts(items);
-    console.log('Catalog loaded:', items.length, 'items');
-  })
-  .catch(err => {
-    console.error('Failed to load products:', err);
-  });
+// appApi
+//   .getProducts()
+//   .then(items => {
+//     catalog.setProducts(items);
+//     console.log('Catalog loaded:', items.length, 'items');
+//   })
+//   .catch(err => {
+//     console.error('Failed to load products:', err);
+//   });
