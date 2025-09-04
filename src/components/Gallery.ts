@@ -1,3 +1,6 @@
+// Отвечает за отображение каталога товаров
+// Принимает список карточек и вставляет их в контейнер
+
 export class Gallery {
   private catalogElement: HTMLElement;
 
@@ -6,6 +9,7 @@ export class Gallery {
     this.catalogElement = root;
   }
 
+  // Подменяет содержимое каталога на новые карточки
   setCatalog(items: HTMLElement[]): void {
     this.catalogElement.replaceChildren(...items);
   }

@@ -2,7 +2,8 @@ import type { ICustomer, ICustomerModel, CustomerErrors } from '../types';
 import { Events } from '../types';
 import { IEvents } from './base/events';
 
-// Клиент (модель данных)
+// Модель клиента. Хранит данные о пользователе (оплата, email, телефон, адрес)
+// Позволяет обновлять, очищать и валидировать данные. Уведомляет систему через events при изменениях
 export class Customer implements ICustomerModel {
   private payment: 'online' | 'cash' | '' = '';
   private email = '';
@@ -14,6 +15,7 @@ export class Customer implements ICustomerModel {
     this.events = events;
   }
 
+  // Обновить данные клиента и оповестить подписчиков
   updateData(data: Partial<ICustomer>): void {
     if (data.payment !== undefined) this.payment = data.payment;
     if (data.email !== undefined) this.email = data.email;
@@ -22,6 +24,7 @@ export class Customer implements ICustomerModel {
     this.events.emit(Events.CustomerUpdated, this.getData());
   }
 
+  // Получить все данные клиента
   getData(): ICustomer {
     return {
       payment: this.payment,
@@ -31,12 +34,14 @@ export class Customer implements ICustomerModel {
     };
   }
 
+  // Проверка данных клиента (валидность)
   validateData(): CustomerErrors {
     const errors: CustomerErrors = {};
     if (!this.address) errors.address = 'Необходимо указать адрес';
     return errors;
   }
 
+  // Сброс данных клиента
   clearData(): void {
     this.payment = '';
     this.email = '';

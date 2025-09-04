@@ -1,6 +1,8 @@
 import { IEvents } from "./base/events";
 import { Events } from "../types";
 
+// Универсальное модальное окно
+// Управляет открытием/закрытием, вставкой содержимого и событиями закрытия
 export class Modal {
   private container: HTMLElement;
   private closeButton: HTMLButtonElement;
@@ -8,6 +10,8 @@ export class Modal {
   private events: IEvents;
   private isOpen = false;
   private closeHandlers: Array<() => void> = [];
+
+  // обработчики событий (Escape, клик по крестику, клик по фону)
   private onEsc = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.isOpen) {
       this.close();
@@ -32,6 +36,7 @@ export class Modal {
     this.container.addEventListener('click', this.handleOverlayClick);
   }
 
+  // открыть модалку
   private open() {
     if (this.isOpen) return;
     this.isOpen = true;
@@ -41,6 +46,7 @@ export class Modal {
     document.body.style.overflow = 'hidden';
   }
 
+  // закрыть модалку
   private close() {
     if (!this.isOpen) return;
     this.isOpen = false;
@@ -53,19 +59,15 @@ export class Modal {
     this.contentElement.replaceChildren();
   }
 
+  // установить новое содержимое и открыть
   setContent(content: HTMLElement): void {
     this.contentElement.innerHTML = '';
     this.contentElement.appendChild(content);
     this.open();
   }
 
+  // подписка на закрытие
   onClose(handler: () => void): void {
     this.closeHandlers.push(handler);
   }
-
-  public destroy() {
-  this.closeButton.removeEventListener('click', this.handleCloseClick);
-  this.container.removeEventListener('click', this.handleOverlayClick);
-  document.removeEventListener('keydown', this.onEsc);
-}
 }

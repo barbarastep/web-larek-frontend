@@ -90,7 +90,7 @@ export interface ICheckoutContactView {
   onSubmit(handler: (data: CheckoutContactModalData) => void): void;
 }
 
-// События
+// События (общий словарь для взаимодействия между модулями)
 export const Events = {
   // данные
   CatalogUpdated: 'catalog:updated',

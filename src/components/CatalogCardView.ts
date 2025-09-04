@@ -1,6 +1,8 @@
 import { IProduct } from "../types";
 import { ProductCardBase } from "./ProductCardBase";
 
+// Карточка товара в каталоге. Наследует ProductCardBase (название + цена)
+// Дополнительно показывает категорию, картинку и сообщает о клике по карточке
 export class CatalogCardView extends ProductCardBase {
   private container: HTMLButtonElement;
   private categoryElement: HTMLElement | null;
@@ -22,6 +24,7 @@ export class CatalogCardView extends ProductCardBase {
     this.container.addEventListener('click', this.handleClick);
   }
 
+  // Рендер карточки товара
   render(product: Omit<IProduct, 'description'>): HTMLElement {
     super.render(product as IProduct);
     if (this.categoryElement) this.categoryElement.textContent = product.category || '';
@@ -33,11 +36,8 @@ export class CatalogCardView extends ProductCardBase {
     return this.container;
   }
 
+  // Подписка на клик по карточке
   onCardClick(handler: (id: string) => void): void {
     this.clickHandlers.push(handler);
-  }
-
-  public destroy() {
-    this.container.removeEventListener('click', this.handleClick);
   }
 }

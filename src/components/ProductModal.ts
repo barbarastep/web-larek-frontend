@@ -1,13 +1,21 @@
+// Карточка товара в модальном окне. Наследуется от ProductCardBase: отображает базовые данные (название, цена)
+// Дополнительно показывает категорию, описание, изображение и кнопку «В корзину»
+// Сообщает наружу о клике на кнопку добавления
+
 import { ProductCardBase } from "./ProductCardBase";
 import { IProduct } from "../types";
 
 export class ProductModal extends ProductCardBase {
+  // DOM-элементы карточки в модалке
   private categoryElement: HTMLElement | null;
   private imgElement: HTMLImageElement | null;
   private descriptionElement: HTMLElement | null;
   private addButton: HTMLButtonElement | null;
+
+  // Список обработчиков клика «В корзину»
   private addHandlers: Array<() => void> = [];
 
+  // Вызов всех обработчиков при клике
   private handleAdd = () => this.addHandlers.forEach(h => h());
 
   constructor(root: HTMLElement) {
@@ -23,6 +31,7 @@ export class ProductModal extends ProductCardBase {
     this.addButton.addEventListener('click', this.handleAdd);
   }
 
+  // Подставляет данные товара в карточку внутри модалки
   render(product: IProduct): HTMLElement {
     super.render(product);
     if (this.descriptionElement) this.descriptionElement.textContent = product.description || '';
@@ -34,6 +43,7 @@ export class ProductModal extends ProductCardBase {
     return this.getElement();
   }
 
+  // Подписка на событие «добавить товар в корзину»
   onAddItem(handler: () => void) {
     this.addHandlers.push(handler);
   }

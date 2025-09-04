@@ -1,5 +1,7 @@
 import { IEvents } from "./base/events";
 
+// Базовый класс для работы с формами
+// Содержит общую логику: получение/установка данных, обработка ошибок, отправка формы
 export class FormView {
   private formElement: HTMLFormElement;
   private submitButton: HTMLButtonElement;
@@ -19,6 +21,7 @@ export class FormView {
     this.formElement.addEventListener('submit', this.handleSubmit);
   }
 
+  // Получить данные формы как объект
   getData(): Record<string, string> {
     const formData = new FormData(this.formElement);
     const result: Record<string, string> = {};
@@ -28,6 +31,7 @@ export class FormView {
     return result;
   }
 
+  // Заполнить поля формы данными
   setData(data: Record<string, string>): void {
     Object.entries(data).forEach(([key, value]) => {
       const input = this.formElement.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${key}"]`);
@@ -35,25 +39,23 @@ export class FormView {
     });
   }
 
+  // Установить ошибки и заблокировать/разблокировать кнопку
   setErrors(errors: Record<string, string>): void {
     if (this.errorElement) {
       this.errorElement.textContent = Object.values(errors).join(', ');
     }
-      this.submitButton.disabled = Object.keys(errors).length > 0;
-
+    this.submitButton.disabled = Object.keys(errors).length > 0;
   }
 
+  // Подписка на событие отправки формы
   onSubmit(handler: (data: Record<string, string>) => void): void {
     this.onSubmitHandlers.push(handler);
   }
 
+  // Внутренняя обработка события submit
   private handleSubmit = (event: Event) => {
     event.preventDefault();
     const data = this.getData();
     this.onSubmitHandlers.forEach((handler) => handler(data));
-  }
-
-  public destroy() {
-    this.formElement.removeEventListener('submit', this.handleSubmit);
   }
 }

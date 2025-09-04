@@ -1,6 +1,8 @@
 import type { CheckoutContactModalData } from '../types';
 import { FormView } from './FormView';
 
+// Форма ввода email и телефона. Наследует FormView (общая логика форм)
+// Отслеживает заполнение полей и включает кнопку «Оплатить», когда данные введены
 export class CheckoutContact extends FormView {
   private emailInput: HTMLInputElement;
   private phoneInput: HTMLInputElement;
@@ -25,12 +27,14 @@ export class CheckoutContact extends FormView {
     this.validate();
   }
 
+  // Заполнить форму данными
   setData(data: CheckoutContactModalData): void {
     this.emailInput.value = data.email ?? '';
     this.phoneInput.value = data.phone ?? '';
     this.validate();
   }
 
+  // Получить данные формы
   getData(): CheckoutContactModalData {
     return {
       email: this.emailInput.value.trim(),
@@ -38,10 +42,12 @@ export class CheckoutContact extends FormView {
     };
   }
 
+  // Подписка на отправку формы
   onSubmit(handler: (data: CheckoutContactModalData) => void): void {
     super.onSubmit(() => handler(this.getData()));
   }
 
+  // Проверка: кнопка активна только если оба поля заполнены
   private validate(): void {
     const errors: Record<string, string> = {};
 
@@ -54,5 +60,4 @@ export class CheckoutContact extends FormView {
 
     this.setErrors(errors);
   }
-
 }

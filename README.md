@@ -60,7 +60,7 @@ export interface IProduct {
 
 ```
 export interface ICustomer {
-  payment: 'card' | 'online' | ''
+  payment: 'cash' | 'online' | ''
   email: string
   phone: string
   address: string
@@ -102,7 +102,7 @@ export type CheckoutContactModalData = Pick<ICustomer, 'email' | 'phone'>;
 Данные для создания заказа
 
 ```
-export type OrderPayload = ICustomer & { items: string[] };
+export type OrderPayload = ICustomer & { items: string[]; total: number };
 ```
 
 Ответ сервера: итоговая сумма заказа
@@ -110,7 +110,6 @@ export type OrderPayload = ICustomer & { items: string[] };
 ```
 export type OrderResponse = { total: number };
 ```
-
 
 ## Архитектура приложения
 
@@ -247,8 +246,7 @@ export type OrderResponse = { total: number };
 - priceElement: HTMLElement
 
 Методы:
-- render(data: ProductCardCommon) — подставляет данные в карточку
-
+- render(product: IProduct) — подставляет данные в карточку
 
 #### CatalogCardView (карточка товара в списке)
 Карточка товара в списке. Наследуется от ProductCardBase, поэтому использует базовую разметку карточки. Показывает основные данные товара и реагирует на клик по карточке.
@@ -267,7 +265,7 @@ export type OrderResponse = { total: number };
 - addButton: HTMLButtonElement
 
 Методы:
-- setData(data: HTMLElement) — рендерит карточку товара
+- render(product: IProduct) — рендерит карточку товара
 - onAddItem(handler: () => void) — сообщает о клике «В корзину»
 
 #### BasketItemView (карточка товара в корзине)
@@ -281,8 +279,7 @@ export type OrderResponse = { total: number };
 - render(data: ProductCardCommon & { index: number }) — рендерит строку корзины
 - onRemove(handler: (id: string) => void) — сообщает о клике «Удалить»
 
-
-#### Basket (корзина)
+#### BasketView (корзина)
 Представляет корзину пользователя. Показывает список выбранных товаров, общую стоимость и кнопку «Оформить». Сообщает о клике для перехода к оформлению.
 
 Поля:
@@ -294,8 +291,6 @@ export type OrderResponse = { total: number };
 - setItems(items: HTMLElement[]) — вставляет список товаров
 - setTotal(value: number) — обновляет сумму
 - onCheckout(handler: () => void) — сообщает о клике «Оформить»
-
-
 
 #### Success (подтверждение заказа)
 Окно подтверждения заказа. Показывает сообщение об успешной оплате и сумму покупки. Сообщает о клике «За новыми покупками!».
@@ -328,7 +323,6 @@ export type OrderResponse = { total: number };
 Методы:
 - setCatalog(items: HTMLElement[]) — вставляет карточки каталога
 
-
 ### Слой коммуникации
 #### Класс AppApi
 Принимает в конструктор экземпляр класса `Api` и предоставляет методы, реализующие взаимодействие с бэкендом сервиса.
@@ -353,7 +347,7 @@ export type OrderResponse = { total: number };
 - `basket:addItem` — клик «В корзину» в превью товара (передаёт `productId`).
 - `basket:removeItem` — удаление позиции из корзины (передаёт `productId`).
 - `basket:checkout` — клик «Оформить» в корзине.
-- `checkout:paymentSelect` — выбор способа оплаты (`'card' | 'online'`).
+- `checkout:paymentSelect` — выбор способа оплаты (`'cash' | 'online'`).
 - `checkout:payValidate` — проверка правильности заполнения формы оплаты (кнопка «Далее» активируется/деактивируется).
 - `checkout:paySubmit` — сабмит формы оплаты/адреса (передаёт `{ payment, address }`).
 - `checkout:contactValidate` — проверка правильности заполнения контактной формы (кнопка «Оплатить» активируется/деактивируется).
