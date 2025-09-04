@@ -210,3 +210,27 @@ appApi
 
 // // Добавим корзину на страницу для наглядности
 // document.body.appendChild(basketEl);
+
+// Проверка CheckoutPay - удачно
+// import { CheckoutPay } from './components/CheckoutPay';
+
+// const orderTemplate = document.getElementById('order') as HTMLTemplateElement;
+// if (!orderTemplate) throw new Error('order template not found');
+
+// const formNode = orderTemplate.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+// document.body.appendChild(formNode);
+
+// const checkoutPay = new CheckoutPay(formNode);
+
+// checkoutPay.onSubmit((data) => {
+//   console.log('SUBMIT:', data);
+// });
+
+// // Заполним тестовые данные
+// checkoutPay.setData({
+//   payment: 'online',
+//   address: 'Spb Vosstania 1',
+// });
+
+// // Проверим getData()
+// console.log('👉 getData():', checkoutPay.getData());

@@ -4,7 +4,7 @@ import { IEvents } from './base/events';
 
 // Клиент (модель данных)
 export class Customer implements ICustomerModel {
-  private payment: 'card' | 'online' | '' = '';
+  private payment: 'online' | 'cash' | '' = '';
   private email = '';
   private phone = '';
   private address = '';

@@ -9,7 +9,7 @@ export interface IProduct {
 }
 
 export interface ICustomer {
-  payment: 'card' | 'online' | '';
+  payment: 'online' | 'cash' | '';
   email: string;
   phone: string;
   address: string;
