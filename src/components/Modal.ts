@@ -37,29 +37,39 @@ export class Modal {
   }
 
   // открыть модалку
-  private open() {
-    if (this.isOpen) return;
-    this.isOpen = true;
-    this.container.classList.add('modal_active');
-    this.container.setAttribute('aria-hidden', 'false');
-    document.addEventListener('keydown', this.onEsc);
-    document.body.style.overflow = 'hidden';
+private open() {
+  this.container.classList.add('modal_active');
+  this.container.setAttribute('aria-hidden', 'false');
+
+  if (this.isOpen) {
+    return;
   }
 
-  // закрыть модалку
-  private close() {
-    if (!this.isOpen) return;
-    this.isOpen = false;
-    this.container.classList.remove('modal_active');
-    this.container.setAttribute('aria-hidden', 'true');
-    document.removeEventListener('keydown', this.onEsc);
-    document.body.style.overflow = '';
-    this.events.emit(Events.ModalClose);
-    this.closeHandlers.forEach((handler) => handler());
-    this.contentElement.replaceChildren();
-  }
+  this.isOpen = true;
+  document.addEventListener('keydown', this.onEsc);
+  document.body.style.overflow = 'hidden';
+}
 
-  // установить новое содержимое и открыть
+// закрыть модалку
+private close() {
+  if (!this.isOpen) return;
+
+  this.isOpen = false;
+
+  (document.activeElement as HTMLElement | null)?.blur?.();
+
+  document.removeEventListener('keydown', this.onEsc);
+  document.body.style.overflow = '';
+
+  this.container.classList.remove('modal_active');
+  this.container.setAttribute('aria-hidden', 'true');
+
+  this.events.emit(Events.ModalClose);
+  this.closeHandlers.forEach((handler) => handler());
+  this.contentElement.replaceChildren();
+}
+
+// установить новое содержимое и открыть
   setContent(content: HTMLElement): void {
     this.contentElement.innerHTML = '';
     this.contentElement.appendChild(content);

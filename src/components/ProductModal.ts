@@ -1,9 +1,10 @@
+import { ProductCardBase } from "./ProductCardBase";
+import { IProduct } from "../types";
+import { CDN_URL } from "../utils/constants";
+
 // Карточка товара в модальном окне. Наследуется от ProductCardBase: отображает базовые данные (название, цена)
 // Дополнительно показывает категорию, описание, изображение и кнопку «В корзину»
 // Сообщает наружу о клике на кнопку добавления
-
-import { ProductCardBase } from "./ProductCardBase";
-import { IProduct } from "../types";
 
 export class ProductModal extends ProductCardBase {
   // DOM-элементы карточки в модалке
@@ -37,7 +38,9 @@ export class ProductModal extends ProductCardBase {
     if (this.descriptionElement) this.descriptionElement.textContent = product.description || '';
     if (this.categoryElement) this.categoryElement.textContent = product.category || '';
     if (this.imgElement) {
-      this.imgElement.src = product.image || '';
+      const p = product.image || '';
+      const imageUrl = p.startsWith('http') ? p : `${CDN_URL}${p.startsWith('/') ? p : '/' + p}`;
+      this.imgElement.src = imageUrl;
       this.imgElement.alt = product.title || '';
     }
     return this.getElement();

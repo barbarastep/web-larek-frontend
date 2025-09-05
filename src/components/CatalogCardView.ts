@@ -1,5 +1,6 @@
 import { IProduct } from "../types";
 import { ProductCardBase } from "./ProductCardBase";
+import { CDN_URL } from "../utils/constants";
 
 // Карточка товара в каталоге. Наследует ProductCardBase (название + цена)
 // Дополнительно показывает категорию, картинку и сообщает о клике по карточке
@@ -29,7 +30,9 @@ export class CatalogCardView extends ProductCardBase {
     super.render(product as IProduct);
     if (this.categoryElement) this.categoryElement.textContent = product.category || '';
     if (this.imgElement) {
-      this.imgElement.src = product.image || '';
+      const p = product.image || '';
+      const imageUrl = p.startsWith('http') ? p : `${CDN_URL}${p.startsWith('/') ? p : '/' + p}`;
+      this.imgElement.src = imageUrl;
       this.imgElement.alt = product.title || '';
     }
 
