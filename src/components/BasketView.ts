@@ -13,12 +13,12 @@ export class BasketView {
     this.container = root;
 
     // Берем элементы из шаблона <template id="basket">
-    const list  = root.querySelector<HTMLElement>('.basket__list');
+    const list = root.querySelector<HTMLElement>('.basket__list');
     const total = root.querySelector<HTMLElement>('.basket__price');
-    const btn   = root.querySelector<HTMLButtonElement>('.basket__button');
-    if (!list)  throw new Error('BasketView: .basket__list not found');
+    const btn = root.querySelector<HTMLButtonElement>('.basket__button');
+    if (!list) throw new Error('BasketView: .basket__list not found');
     if (!total) throw new Error('BasketView: .basket__price not found');
-    if (!btn)   throw new Error('BasketView: .basket__button not found');
+    if (!btn) throw new Error('BasketView: .basket__button not found');
 
     this.listElement = list;
     this.totalElement = total;
@@ -30,8 +30,16 @@ export class BasketView {
 
   // Подставляет список товаров (каждый товар — готовый <li>)
   setItems(items: HTMLElement[]) {
-    this.listElement.replaceChildren(...items);
-    this.checkoutButton.disabled = items.length === 0;
+    if (items.length) {
+      this.listElement.replaceChildren(...items);
+      this.checkoutButton.disabled = false;
+    } else {
+      const emptyMessage = document.createElement('p');
+      emptyMessage.textContent = 'Корзина пуста';
+
+      this.listElement.replaceChildren(emptyMessage);
+      this.checkoutButton.disabled = true;
+    }
   }
 
   // Обновляет сумму заказа
@@ -43,6 +51,13 @@ export class BasketView {
   // Подписка на событие "Оформить"
   onCheckout(handler: () => void) {
     this.checkoutHandlers.push(handler);
+  }
+
+  private makeEmptyMessage(): HTMLElement {
+    const li = document.createElement('li');
+    li.className = 'basket__empty';
+    li.textContent = 'Корзина пуста';
+    return li;
   }
 
   public getElement(): HTMLElement {
