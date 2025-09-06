@@ -48,6 +48,15 @@ export class ProductModal extends ProductCardBase {
       this.imgElement.src = imageUrl;
       this.imgElement.alt = product.title || '';
     }
+    if (this.addButton) {
+      if (product.price === null) {
+        this.addButton.textContent = 'Недоступно';
+        this.addButton.disabled = true;
+      } else {
+        this.addButton.textContent = 'Купить';
+        this.addButton.disabled = false;
+      }
+    }
     return this.getElement();
   }
 
@@ -58,9 +67,20 @@ export class ProductModal extends ProductCardBase {
 
   // Обновляет состояние кнопки в зависимости от того, в корзине товар или нет
   setInBasket(inBasket: boolean) {
-  if (!this.addButton) return;
-  this.addButton.textContent = inBasket ? 'Удалить из корзины' : 'Купить';
-}
+    if (!this.addButton) return;
+
+    const p = this.getProduct();
+    if (!p) return;
+
+    if (p.price === null) {
+      this.addButton.textContent = 'Недоступно';
+      this.addButton.disabled = true;
+      return;
+    }
+
+    this.addButton.textContent = inBasket ? 'Удалить из корзины' : 'Купить';
+    this.addButton.disabled = false;
+  }
 }
 
 const category_mod: Record<string, string> = {

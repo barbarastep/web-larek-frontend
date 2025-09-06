@@ -40,4 +40,8 @@ export class ProductCardBase {
   getElement(): HTMLElement {
     return this.root;
   }
+
+  protected getProduct(): IProduct | null {
+    return this.product;
+  }
 }
