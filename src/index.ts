@@ -171,3 +171,24 @@ events.on(Events.BasketRemoveItem, ({ id }: { id: string }) => {
 events.on(Events.BasketChanged, () => {
   header.setCounter(basket.getCount());
 });
+
+// Оформление заказа
+events.on(Events.BasketCheckout, () => {
+  const formPay = makeCheckoutPay();
+  formPay.setData(customer.getData());
+  formPay.onSubmit((data) => {
+    customer.updateData(data);
+
+    const formContact = makeCheckoutContact();
+    formContact.setData(customer.getData());
+    formContact.onSubmit((contactData) => {
+      customer.updateData(contactData);
+
+      console.log('[TEST] customer data ready:', customer.getData());
+    });
+
+    modal.setContent(formContact.getElement());
+  });
+
+  modal.setContent(formPay.getElement());
+});

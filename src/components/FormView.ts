@@ -58,4 +58,8 @@ export class FormView {
     const data = this.getData();
     this.onSubmitHandlers.forEach((handler) => handler(data));
   }
+
+  public getElement(): HTMLFormElement {
+    return this.formElement;
+  }
 }
