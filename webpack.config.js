@@ -21,7 +21,11 @@ const config = {
     path: path.resolve(__dirname, "dist"),
   },
   devServer: {
-    open: true,
+    open: {
+      app: {
+        name: 'google chrome'   // для macOS
+      }
+    },
     host: "localhost",
     watchFiles: ["src/pages/*.html"],
     hot: true

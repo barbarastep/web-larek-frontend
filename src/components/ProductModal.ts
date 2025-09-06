@@ -36,7 +36,12 @@ export class ProductModal extends ProductCardBase {
   render(product: IProduct): HTMLElement {
     super.render(product);
     if (this.descriptionElement) this.descriptionElement.textContent = product.description || '';
-    if (this.categoryElement) this.categoryElement.textContent = product.category || '';
+    if (this.categoryElement) {
+      this.categoryElement.textContent = product.category || '';
+      this.categoryElement.className = 'card__category';
+      const mod = category_mod[(product.category || '').toLowerCase()];
+      if (mod) this.categoryElement.classList.add(`card__category_${mod}`);
+    }
     if (this.imgElement) {
       const p = product.image || '';
       const imageUrl = p.startsWith('http') ? p : `${CDN_URL}${p.startsWith('/') ? p : '/' + p}`;
@@ -50,4 +55,18 @@ export class ProductModal extends ProductCardBase {
   onAddItem(handler: () => void) {
     this.addHandlers.push(handler);
   }
+
+  // Обновляет состояние кнопки в зависимости от того, в корзине товар или нет
+  setInBasket(inBasket: boolean) {
+  if (!this.addButton) return;
+  this.addButton.textContent = inBasket ? 'Удалить из корзины' : 'Купить';
 }
+}
+
+const category_mod: Record<string, string> = {
+  'софт-скил': 'soft',
+  'хард-скил': 'hard',
+  'другое': 'other',
+  'дополнительное': 'additional',
+  'кнопка': 'button',
+};

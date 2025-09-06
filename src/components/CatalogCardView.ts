@@ -28,7 +28,12 @@ export class CatalogCardView extends ProductCardBase {
   // Рендер карточки товара
   render(product: Omit<IProduct, 'description'>): HTMLElement {
     super.render(product as IProduct);
-    if (this.categoryElement) this.categoryElement.textContent = product.category || '';
+    if (this.categoryElement) {
+      this.categoryElement.textContent = product.category || '';
+      this.categoryElement.className = 'card__category';
+      const mod = category_mod[(product.category || '').toLowerCase()];
+      if (mod) this.categoryElement.classList.add(`card__category_${mod}`);
+    }
     if (this.imgElement) {
       const p = product.image || '';
       const imageUrl = p.startsWith('http') ? p : `${CDN_URL}${p.startsWith('/') ? p : '/' + p}`;
@@ -44,3 +49,11 @@ export class CatalogCardView extends ProductCardBase {
     this.clickHandlers.push(handler);
   }
 }
+
+const category_mod: Record<string, string> = {
+  'софт-скил': 'soft',
+  'хард-скил': 'hard',
+  'другое': 'other',
+  'дополнительное': 'additional',
+  'кнопка': 'button',
+};

@@ -57,10 +57,12 @@ function cloneTemplate(template: HTMLTemplateElement): HTMLElement {
 // Представления
 const modal = new Modal(modalContainer, events);
 const header = new Header(headerElement);
+header.onBasketClick(() => { renderBasketModal(); });
 const galleryRoot = document.querySelector<HTMLElement>('main.gallery');
 if (!galleryRoot) throw new Error('Gallery root <main class="gallery"> not found');
 const gallery = new Gallery(galleryRoot);
 
+// Хелперы
 const makeCatalogCard = () => new CatalogCardView(cloneTemplate(templateCatalogCard));
 const makeProductModal = () => new ProductModal(cloneTemplate(templateProductModal));
 const makeBasketItem = () => new BasketItemView(cloneTemplate(templateBasketItem));
@@ -69,10 +71,44 @@ const makeCheckoutPay = () => new CheckoutPay(cloneTemplate(templateOrder) as HT
 const makeCheckoutContact = () => new CheckoutContact(cloneTemplate(templateContacts) as HTMLFormElement);
 const makeSuccess = () => new Success(cloneTemplate(templateSuccess));
 
+// Найти товар в каталоге по id
+function getProductById(id: string) {
+  return catalog.getProducts().find(p => p.id === id) ?? null;
+}
+
+// Рендер корзины в модалку
+function renderBasketModal() {
+  const basketView = makeBasketView();
+
+  const items = basket.getItems().map((p, i) => {
+    const row = makeBasketItem();
+    row.renderItem({
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      index: i + 1,
+    });
+
+    row.onRemove((id) => {
+      events.emit(Events.BasketRemoveItem, { id });
+    });
+
+    return row.getElement ? (row as any).getElement?.() ?? (row as any) : (row as any);
+  });
+
+  basketView.setItems(items);
+  basketView.setTotal(basket.getTotal());
+
+  basketView.onCheckout(() => {
+    events.emit(Events.BasketCheckout);
+  });
+
+  modal.setContent(basketView.getElement());
+}
+
 // Рендер каталога при обновлении данных
 events.on(Events.CatalogUpdated, (payload?: unknown) => {
   const products = (payload as IProduct[]) ?? catalog.getProducts();
-  console.log('[TEST] products length =', products.length); // временно
   const items = products.map(product => {
     const card = makeCatalogCard();
 
@@ -96,9 +132,16 @@ events.on(Events.PreviewChanged, ({ id }: { id: string | null }) => {
 
   const view = makeProductModal();
   view.render(product);
+  view.setInBasket(basket.hasInBasket(product.id));
 
   view.onAddItem(() => {
-    events.emit(Events.BasketAddItem, { id: product.id });
+    if (basket.hasInBasket(product.id)) {
+      basket.removeProduct(product.id);
+      view.setInBasket(false);
+    } else {
+      basket.addItem(product);
+      view.setInBasket(true);
+    }
   });
 
   modal.setContent(view.getElement());
@@ -113,19 +156,18 @@ appApi
   .then(items => catalog.setProducts(items))
   .catch(err => console.error('Failed to load products:', err));
 
-// === DEBUG: временные логи событий ===
-events.on(Events.GalleryCardClick, (d) => console.log('[TEST] GalleryCardClick', d));
-events.on(Events.PreviewChanged, (d) => console.log('[TEST] PreviewChanged', d));
-events.on(Events.ModalClose, () => console.log('[TEST] ModalClose'));
-events.on(Events.BasketAddItem, (id) => console.log('[TEST] BasketAddItem', id));
+// Добавление товара в корзину
+events.on(Events.BasketAddItem, ({ id }: { id: string }) => {
+  const product = getProductById(id);
+  if (!product) return;
+  basket.addItem(product);
+});
 
-// Удобно: вытащим в window для ручных проверок из консоли
-(Object.assign(window as any, { events, catalog, Events }));
+events.on(Events.BasketRemoveItem, ({ id }: { id: string }) => {
+  basket.removeProduct(id);
+  renderBasketModal();
+});
 
-// dev-debug only
-// @ts-ignore
-(window as any).events = events;
-// @ts-ignore
-(window as any).catalog = catalog;
-
-(Object as any).assign(window as any, { modal });
+events.on(Events.BasketChanged, () => {
+  header.setCounter(basket.getCount());
+});

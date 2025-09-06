@@ -44,4 +44,8 @@ export class BasketView {
   onCheckout(handler: () => void) {
     this.checkoutHandlers.push(handler);
   }
+
+  getElement(): HTMLElement {
+    return this.container;
+  }
 }
