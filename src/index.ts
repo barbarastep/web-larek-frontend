@@ -42,17 +42,12 @@ const templateOrder = document.getElementById('order') as HTMLTemplateElement;
 const templateContacts = document.getElementById('contacts') as HTMLTemplateElement;
 const templateSuccess = document.getElementById('success') as HTMLTemplateElement;
 
-// Проверка на месте ли узлы
-console.assert(!!modalContainer, 'modalContainer not found');
-console.assert(!!headerElement, 'headerElement not found');
-console.assert(!!templateCatalogCard && !!templateProductModal && !!templateBasket && !!templateBasketItem && !!templateOrder && !!templateContacts && !!templateSuccess, 'Some templates not found');
-
 // Клонирование шаблонов
 function cloneTemplate(template: HTMLTemplateElement): HTMLElement {
   const node = template.content.firstElementChild?.cloneNode(true);
   if (!(node instanceof HTMLElement)) throw new Error('Template is empty or invalid');
   return node;
-};
+}
 
 // Представления
 const modal = new Modal(modalContainer, events);
@@ -93,7 +88,7 @@ function renderBasketModal() {
       events.emit(Events.BasketRemoveItem, { id });
     });
 
-    return row.getElement ? (row as any).getElement?.() ?? (row as any) : (row as any);
+    return row.getElement();
   });
 
   basketView.setItems(items);
