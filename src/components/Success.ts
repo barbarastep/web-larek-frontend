@@ -36,4 +36,8 @@ export class Success {
   onContinue(handler: () => void) {
     this.continueHandlers.push(handler);
   }
+
+  public getElement(): HTMLElement {
+    return this.root;
+  }
 }

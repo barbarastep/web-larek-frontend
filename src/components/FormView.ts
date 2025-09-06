@@ -42,7 +42,8 @@ export class FormView {
   // Установить ошибки и заблокировать/разблокировать кнопку
   setErrors(errors: Record<string, string>): void {
     if (this.errorElement) {
-      this.errorElement.textContent = Object.values(errors).join(', ');
+      const messages = Object.values(errors).filter(Boolean);
+      this.errorElement.textContent = messages.join(', ');
     }
     this.submitButton.disabled = Object.keys(errors).length > 0;
   }

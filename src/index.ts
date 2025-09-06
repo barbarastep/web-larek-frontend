@@ -184,11 +184,39 @@ events.on(Events.BasketCheckout, () => {
     formContact.onSubmit((contactData) => {
       customer.updateData(contactData);
 
-      console.log('[TEST] customer data ready:', customer.getData());
+      events.emit(Events.CheckoutContactSubmit, contactData);
     });
 
     modal.setContent(formContact.getElement());
   });
 
   modal.setContent(formPay.getElement());
+});
+
+// Сабмит контактной формы и отправка заказа
+events.on(Events.CheckoutContactSubmit, async (data) => {
+  try {
+    customer.updateData(data);
+
+    const payload = {
+      ...customer.getData(),
+      items: basket.buildOrderItems(),
+      total: basket.getTotal(),
+    };
+
+    const response = await appApi.createOrder(payload);
+
+    const view = makeSuccess();
+    view.setTotal(response.total);
+    view.onContinue(() => {
+      modal.hide();
+    });
+
+    modal.setContent(view.getElement());
+    basket.clearBasket();
+    customer.clearData();
+  } catch (err) {
+    console.error('Order failed:', err);
+    alert('Не удалось оформить заказ. Попробуйте ещё раз.');
+  }
 });
