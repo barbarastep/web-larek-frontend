@@ -20,12 +20,10 @@ export class CheckoutPay extends FormView {
     const buttonCard = formElement.querySelector<HTMLButtonElement>('button[name="card"]');
     const buttonCash = formElement.querySelector<HTMLButtonElement>('button[name="cash"]');
     const address = formElement.querySelector<HTMLInputElement>('input[name="address"]');
-    const submit = formElement.querySelector<HTMLButtonElement>('button[type="submit"]');
 
     if (!buttonCard) throw new Error('CheckoutPay: button[name="card"] not found');
     if (!buttonCash) throw new Error('CheckoutPay: button[name="cash"] not found');
     if (!address) throw new Error('CheckoutPay: input[name="address"] not found');
-    if (!submit) throw new Error('CheckoutPay: submit button not found');
 
     this.buttonCard = buttonCard;
     this.buttonCash = buttonCash;

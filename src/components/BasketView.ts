@@ -31,15 +31,12 @@ export class BasketView {
   // Подставляет список товаров (каждый товар — готовый <li>)
   setItems(items: HTMLElement[]) {
     if (items.length) {
-      this.listElement.replaceChildren(...items);
-      this.checkoutButton.disabled = false;
-    } else {
-      const emptyMessage = document.createElement('p');
-      emptyMessage.textContent = 'Корзина пуста';
-
-      this.listElement.replaceChildren(emptyMessage);
-      this.checkoutButton.disabled = true;
-    }
+    this.listElement.replaceChildren(...items);
+    this.checkoutButton.disabled = false;
+  } else {
+    this.listElement.replaceChildren(this.makeEmptyMessage());
+    this.checkoutButton.disabled = true;
+  }
   }
 
   // Обновляет сумму заказа

@@ -212,6 +212,5 @@ events.on(Events.CheckoutContactSubmit, async (data) => {
     customer.clearData();
   } catch (err) {
     console.error('Order failed:', err);
-    alert('Не удалось оформить заказ. Попробуйте ещё раз.');
   }
 });
