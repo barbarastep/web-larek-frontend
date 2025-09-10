@@ -60,7 +60,7 @@ export interface IProduct {
 
 ```
 export interface ICustomer {
-  payment: 'cash' | 'online' | ''
+  payment: 'online' | 'cash' | ''
   email: string
   phone: string
   address: string
@@ -73,6 +73,12 @@ export interface ICustomer {
 export interface IProductData {
   products: IProduct[];
   preview: string | null;
+  getProducts(): IProduct[];
+  setProducts(products: IProduct[]): void;
+  getSelectedProduct(): IProduct | null;
+  setSelectedProduct(product: IProduct): void;
+  setSelectedProductId(id: string): void;
+  getProductById(id: string): IProduct | null;
 }
 ```
 Товар для главной страницы
@@ -97,6 +103,13 @@ export type CheckoutPayModalData = Pick<ICustomer, 'payment' | 'address'>;
 
 ```
 export type CheckoutContactModalData = Pick<ICustomer, 'email' | 'phone'>;
+```
+
+Служебные типы
+
+```
+export type CustomerErrors = Record<string, string>;
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 ```
 
 Данные для создания заказа
@@ -332,24 +345,18 @@ export type OrderResponse = { total: number };
 
 **Список всех событий, которые могут генерироваться в системе:**
 
-*События изменения данных (генерируются классами моделями данных)*
+*События изменения данных (генерируются моделями данных)*
 - `catalog:updated` — каталог товаров загружен/обновлён.
 - `catalog:previewChanged` — выбран товар для просмотра.
 - `basket:changed` — состав корзины изменился (добавление/удаление/очистка).
 - `customer:updated` — данные покупателя обновлены/очищены.
-- `order:created` — заказ успешно создан (получен `total` с сервера).
-- `order:error` — ошибка при создании заказа.
 
 *События, возникающие при взаимодействии пользователя с интерфейсом (генерируются классами, отвечающими за представление)*
-- `header:basketClick` — клик по кнопке корзины.
 - `gallery:cardClick` — клик по карточке товара (передаёт `productId`).
-- `modal:close` — закрытие модального окна.
-- `basket:addItem` — клик «В корзину» в превью товара (передаёт `productId`).
+- `basket:addItem` — добавление товара в корзину (передаёт `productId`).
 - `basket:removeItem` — удаление позиции из корзины (передаёт `productId`).
 - `basket:checkout` — клик «Оформить» в корзине.
-- `checkout:paymentSelect` — выбор способа оплаты (`'cash' | 'online'`).
-- `checkout:payValidate` — проверка правильности заполнения формы оплаты (кнопка «Далее» активируется/деактивируется).
-- `checkout:paySubmit` — сабмит формы оплаты/адреса (передаёт `{ payment, address }`).
-- `checkout:contactValidate` — проверка правильности заполнения контактной формы (кнопка «Оплатить» активируется/деактивируется).
+- `basket:open` — открыть корзину в модалке.
 - `checkout:contactSubmit` — сабмит формы контактов (передаёт `{ email, phone }`).
-- `success:continue` — клик «За новыми покупками!`.
+- `modal:open` — модалка открыта.
+- `modal:close` — модалка закрыта.

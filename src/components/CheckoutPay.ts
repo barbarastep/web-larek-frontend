@@ -1,10 +1,6 @@
 import type { CheckoutPayModalData } from '../types';
 import { FormView } from './FormView';
-
-const map_button_to_payment = {
-  card: 'online',
-  cash: 'cash',
-} as const;
+import { ensureElement } from '../utils/utils';
 
 // Форма выбора способа оплаты и ввода адреса. Наследует FormView (общая логика форм)
 // Отвечает за выбор online/cash, ввод адреса и активность кнопки «Далее»
@@ -12,69 +8,45 @@ export class CheckoutPay extends FormView {
   private buttonCard: HTMLButtonElement;
   private buttonCash: HTMLButtonElement;
   private addressInput: HTMLInputElement;
-  private selectedPayment: 'online' | 'cash' | '' = '';
+  private onPaymentHandler?: (payment: 'online' | 'cash') => void;
+  private onAddressHandler?: (value: string) => void;
 
   constructor(formElement: HTMLFormElement) {
     super(formElement);
 
-    const buttonCard = formElement.querySelector<HTMLButtonElement>('button[name="card"]');
-    const buttonCash = formElement.querySelector<HTMLButtonElement>('button[name="cash"]');
-    const address = formElement.querySelector<HTMLInputElement>('input[name="address"]');
+    this.buttonCard = ensureElement<HTMLButtonElement>('button[name="card"]', formElement);
+    this.buttonCash = ensureElement<HTMLButtonElement>('button[name="cash"]', formElement);
+    this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', formElement);
 
-    if (!buttonCard) throw new Error('CheckoutPay: button[name="card"] not found');
-    if (!buttonCash) throw new Error('CheckoutPay: button[name="cash"] not found');
-    if (!address) throw new Error('CheckoutPay: input[name="address"] not found');
+    this.buttonCard.addEventListener('click', () => {
+      this.onPaymentHandler?.('online');
+    });
 
-    this.buttonCard = buttonCard;
-    this.buttonCash = buttonCash;
-    this.addressInput = address;
-
-    this.buttonCard.addEventListener('click', () => this.setPayment(map_button_to_payment.card));
-    this.buttonCash.addEventListener('click', () => this.setPayment(map_button_to_payment.cash));
-    this.addressInput.addEventListener('input', () => this.validate());
-
-    this.updateButtonsActive();
-    this.validate();
+    this.buttonCash.addEventListener('click', () => {
+      this.onPaymentHandler?.('cash');
+    });
+    this.addressInput.addEventListener('input', () => {
+      this.onAddressHandler?.(this.addressInput.value);
+    });
   }
 
-  // Заполнить форму данными
-  setData(data: CheckoutPayModalData) {
+  // Рендер данных в форму
+  render(data: CheckoutPayModalData, errors: Record<string, string> = {}): void {
     this.addressInput.value = data.address ?? '';
-    this.selectedPayment = data.payment ?? '';
-    this.updateButtonsActive();
-    this.validate();
-  }
 
-  // Получить данные формы
-  getData(): CheckoutPayModalData {
-    return {
-      payment: this.selectedPayment,
-      address: this.addressInput.value.trim(),
-    };
-  }
+    const isOnline = data.payment === 'online';
+    const isCash = data.payment === 'cash';
+    this.buttonCard.classList.toggle('button_alt-active', isOnline);
+    this.buttonCash.classList.toggle('button_alt-active', isCash);
 
-  // Подписка на отправку формы
-  onSubmit(handler: (data: CheckoutPayModalData) => void): void {
-    super.onSubmit(() => handler(this.getData()));
-  }
-
-  // Установить выбранный способ оплаты
-  private setPayment(p: 'online' | 'cash') {
-    this.selectedPayment = p;
-    this.updateButtonsActive();
-    this.validate();
-  }
-
-  // Подсветка активной кнопки способа оплаты
-  private updateButtonsActive() {
-    this.buttonCard.classList.toggle('button_alt-active', this.selectedPayment === 'online');
-    this.buttonCash.classList.toggle('button_alt-active', this.selectedPayment === 'cash');
-  }
-
-  // Проверка: адрес обязателен, иначе кнопка заблокирована
-  private validate() {
-    const errors: Record<string, string> = {};
-    if (!this.addressInput.value.trim()) errors.address = 'Необходимо указать адрес';
     this.setErrors(errors);
+  }
+
+  // Навешивание обработчиков событий
+  onPaymentSelect(handler: (payment: 'online' | 'cash') => void) {
+    this.onPaymentHandler = handler;
+  }
+  onAddressChange(handler: (value: string) => void) {
+    this.onAddressHandler = handler;
   }
 }

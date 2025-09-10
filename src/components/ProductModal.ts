@@ -1,6 +1,7 @@
 import { ProductCardBase } from "./ProductCardBase";
 import { IProduct } from "../types";
 import { CDN_URL } from "../utils/constants";
+import { ensureElement } from "../utils/utils";
 
 // Карточка товара в модальном окне. Наследуется от ProductCardBase: отображает базовые данные (название, цена)
 // Дополнительно показывает категорию, описание, изображение и кнопку «В корзину»
@@ -8,79 +9,65 @@ import { CDN_URL } from "../utils/constants";
 
 export class ProductModal extends ProductCardBase {
   // DOM-элементы карточки в модалке
-  private categoryElement: HTMLElement | null;
-  private imgElement: HTMLImageElement | null;
-  private descriptionElement: HTMLElement | null;
-  private addButton: HTMLButtonElement | null;
-
-  // Список обработчиков клика «В корзину»
-  private addHandlers: Array<() => void> = [];
-
-  // Вызов всех обработчиков при клике
-  private handleAdd = () => this.addHandlers.forEach(h => h());
+  private categoryElement: HTMLElement;
+  private imgElement: HTMLImageElement;
+  private descriptionElement: HTMLElement;
+  private addButton: HTMLButtonElement;
 
   constructor(root: HTMLElement) {
     super(root);
 
-    this.addButton = root.querySelector<HTMLButtonElement>('.card__button');
-    if (!this.addButton) throw new Error('ProductModal: .card__button not found');
-
-    this.descriptionElement = root.querySelector<HTMLElement>('.card__text');
-    this.imgElement = root.querySelector<HTMLImageElement>('.card__image');
-    this.categoryElement = root.querySelector<HTMLElement>('.card__category');
+    this.addButton = ensureElement<HTMLButtonElement>('.card__button', root);
+    this.descriptionElement = ensureElement<HTMLElement>('.card__text', root);
+    this.imgElement = ensureElement<HTMLImageElement>('.card__image', root);
+    this.categoryElement = ensureElement<HTMLElement>('.card__category', root);
 
     this.addButton.addEventListener('click', this.handleAdd);
+  }
+
+  // Обработчик клика «В корзину»
+  private onAddHandler?: () => void;
+
+  // Вызов обработчика при клике
+  private handleAdd = () => { if (this.onAddHandler) this.onAddHandler(); };
+
+  // Переопределяет формат цены: в модалке для null выводим «Бесценно»
+  protected formatPrice(price: number | null): string {
+    return price == null ? 'Бесценно' : `${price} синапсов`;
   }
 
   // Подставляет данные товара в карточку внутри модалки
   render(product: IProduct): HTMLElement {
     super.render(product);
-    if (this.descriptionElement) this.descriptionElement.textContent = product.description || '';
-    if (this.categoryElement) {
-      this.categoryElement.textContent = product.category || '';
-      this.categoryElement.className = 'card__category';
-      const mod = category_mod[(product.category || '').toLowerCase()];
-      if (mod) this.categoryElement.classList.add(`card__category_${mod}`);
-    }
-    if (this.imgElement) {
-      const p = product.image || '';
-      const imageUrl = p.startsWith('http') ? p : `${CDN_URL}${p.startsWith('/') ? p : '/' + p}`;
-      this.imgElement.src = imageUrl;
-      this.imgElement.alt = product.title || '';
-    }
-    if (this.addButton) {
-      if (product.price === null) {
-        this.addButton.textContent = 'Недоступно';
-        this.addButton.disabled = true;
-      } else {
-        this.addButton.textContent = 'Купить';
-        this.addButton.disabled = false;
-      }
-    }
+    this.descriptionElement.textContent = product.description || '';
+    this.categoryElement.textContent = product.category || '';
+    this.categoryElement.className = 'card__category';
+    const mod = category_mod[(product.category || '').toLowerCase()];
+    if (mod) this.categoryElement.classList.add(`card__category_${mod}`);
+    const p = product.image || '';
+    const imageUrl = p.startsWith('http') ? p : `${CDN_URL}${p.startsWith('/') ? p : '/' + p}`;
+    this.imgElement.src = imageUrl;
+    this.imgElement.alt = product.title || '';
+
     return this.getElement();
   }
 
   // Подписка на событие «добавить товар в корзину»
   onAddItem(handler: () => void) {
-    this.addHandlers.push(handler);
+    this.onAddHandler = handler;
   }
 
-  // Обновляет состояние кнопки в зависимости от того, в корзине товар или нет
-  setInBasket(inBasket: boolean) {
-    if (!this.addButton) return;
-
-    const p = this.getProduct();
-    if (!p) return;
-
-    if (p.price === null) {
+  // Обновляет состояние кнопки
+  setPurchaseState(inBasket: boolean, isAvailable: boolean) {
+    if (!isAvailable) {
       this.addButton.textContent = 'Недоступно';
       this.addButton.disabled = true;
       return;
     }
-
     this.addButton.textContent = inBasket ? 'Удалить из корзины' : 'Купить';
     this.addButton.disabled = false;
   }
+
 }
 
 const category_mod: Record<string, string> = {

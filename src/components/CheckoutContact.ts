@@ -1,40 +1,33 @@
 import type { CheckoutContactModalData } from '../types';
 import { FormView } from './FormView';
+import { ensureElement } from '../utils/utils';
 
 // Форма ввода email и телефона. Наследует FormView (общая логика форм)
 // Отслеживает заполнение полей и включает кнопку «Оплатить», когда данные введены
 export class CheckoutContact extends FormView {
   private emailInput: HTMLInputElement;
   private phoneInput: HTMLInputElement;
+  private changeHandler?: (data: CheckoutContactModalData) => void;
 
   constructor(formElement: HTMLFormElement) {
     super(formElement);
 
-    const emailInput = formElement.querySelector<HTMLInputElement>('input[name="email"]');
-    const phoneInput = formElement.querySelector<HTMLInputElement>('input[name="phone"]');
-    const submit = formElement.querySelector<HTMLButtonElement>('button[type="submit"]');
+    this.emailInput = ensureElement<HTMLInputElement>('input[name="email"]', formElement);
+    this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', formElement);
 
-    if (!emailInput) throw new Error('CheckoutContact: input[name="email"] not found');
-    if (!phoneInput) throw new Error('CheckoutContact: input[name="phone"] not found');
-    if (!submit) throw new Error('CheckoutContact: submit button not found');
-
-    this.emailInput = emailInput;
-    this.phoneInput = phoneInput;
-
-    this.emailInput.addEventListener('input', () => this.validate());
-    this.phoneInput.addEventListener('input', () => this.validate());
-
-    this.validate();
+    const notify = () => this.changeHandler?.(this.getData());
+    this.emailInput.addEventListener('input', notify);
+    this.phoneInput.addEventListener('input', notify);
   }
 
-  // Заполнить форму данными
-  setData(data: CheckoutContactModalData): void {
+  // Рендер: данные и ошибки приходят извне от презентера/модели
+  render(data: CheckoutContactModalData, errors: Record<string, string>) {
     this.emailInput.value = data.email ?? '';
     this.phoneInput.value = data.phone ?? '';
-    this.validate();
+    this.setErrors(errors); // FormView сам заблокирует submit при наличии ошибок
   }
 
-  // Получить данные формы
+  // Текущие данные формы
   getData(): CheckoutContactModalData {
     return {
       email: this.emailInput.value.trim(),
@@ -42,22 +35,13 @@ export class CheckoutContact extends FormView {
     };
   }
 
-  // Подписка на отправку формы
-  onSubmit(handler: (data: CheckoutContactModalData) => void): void {
-    super.onSubmit(() => handler(this.getData()));
+  // Коллбек на изменение полей
+  onChange(handler: (data: CheckoutContactModalData) => void) {
+    this.changeHandler = handler;
   }
 
-  // Проверка: кнопка активна только если оба поля заполнены
-  private validate(): void {
-    const errors: Record<string, string> = {};
-
-    if (!this.emailInput.value.trim()) {
-      errors.email = '';
-    }
-    if (!this.phoneInput.value.trim()) {
-      errors.phone = '';
-    }
-
-    this.setErrors(errors);
+  // Сабмит: просто отдаём наружу текущие данные
+  onSubmit(handler: (data: CheckoutContactModalData) => void): void {
+    super.onSubmit(() => handler(this.getData()));
   }
 }

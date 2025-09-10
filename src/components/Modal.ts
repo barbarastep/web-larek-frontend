@@ -11,17 +11,6 @@ export class Modal {
   private isOpen = false;
   private closeHandlers: Array<() => void> = [];
 
-  // обработчики событий (Escape, клик по крестику, клик по фону)
-  private onEsc = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && this.isOpen) {
-      this.close();
-    }
-  };
-  private handleCloseClick = (event: Event) => { event.preventDefault(); this.close(); };
-  private handleOverlayClick = (event: MouseEvent) => {
-    if (event.target === this.container) this.close();
-  };
-
   constructor(container: HTMLElement, events: IEvents) {
     this.container = container;
     this.events = events;
@@ -36,7 +25,18 @@ export class Modal {
     this.container.addEventListener('click', this.handleOverlayClick);
   }
 
-  // открыть модалку
+  // Обработчики событий (Escape, клик по крестику, клик по фону)
+  private onEsc = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.isOpen) {
+      this.close();
+    }
+  };
+  private handleCloseClick = (event: Event) => { event.preventDefault(); this.close(); };
+  private handleOverlayClick = (event: MouseEvent) => {
+    if (event.target === this.container) this.close();
+  };
+
+  // Открыть модалку
   private open() {
     this.container.classList.add('modal_active');
     this.container.setAttribute('aria-hidden', 'false');
@@ -46,11 +46,11 @@ export class Modal {
     }
 
     this.isOpen = true;
+    this.events.emit(Events.ModalOpen);
     document.addEventListener('keydown', this.onEsc);
-    document.body.style.overflow = 'hidden';
   }
 
-  // закрыть модалку
+  // Закрыть модалку
   private close() {
     if (!this.isOpen) return;
 
@@ -59,7 +59,6 @@ export class Modal {
     (document.activeElement as HTMLElement | null)?.blur?.();
 
     document.removeEventListener('keydown', this.onEsc);
-    document.body.style.overflow = '';
 
     this.container.classList.remove('modal_active');
     this.container.setAttribute('aria-hidden', 'true');
@@ -73,14 +72,14 @@ export class Modal {
     this.close();
   }
 
-  // установить новое содержимое и открыть
+  // Установить новое содержимое и открыть
   setContent(content: HTMLElement): void {
     this.contentElement.innerHTML = '';
     this.contentElement.appendChild(content);
     this.open();
   }
 
-  // подписка на закрытие
+  // Подписка на закрытие
   onClose(handler: () => void): void {
     this.closeHandlers.push(handler);
   }

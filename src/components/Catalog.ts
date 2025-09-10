@@ -25,6 +25,11 @@ export class Catalog implements IProductData {
     this.events.emit(Events.CatalogUpdated, this.productsData);
   }
 
+  // Найти товар по id
+  getProductById(id: string): IProduct | null {
+    return this.productsData.find(p => p.id === id) ?? null;
+  }
+
   // Получить выбранный товар (по previewId)
   getSelectedProduct(): IProduct | null {
     return this.previewId

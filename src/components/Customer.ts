@@ -35,10 +35,37 @@ export class Customer implements ICustomerModel {
   }
 
   // Проверка данных клиента (валидность)
-  validateData(): CustomerErrors {
+  validateData(
+    stage: 'pay' | 'contact' | 'all' = 'all',
+    draft: Partial<ICustomer> = {}
+  ): CustomerErrors {
+    const cur = this.getData();
+    const data: ICustomer = {
+      payment: draft.payment ?? cur.payment,
+      address: draft.address ?? cur.address,
+      email: draft.email ?? cur.email,
+      phone: draft.phone ?? cur.phone,
+    };
+
     const errors: CustomerErrors = {};
-    if (!this.address) errors.address = 'Необходимо указать адрес';
+    if (stage === 'pay' || stage === 'all') {
+      if (!data.payment) errors.payment = '';
+      if (!data.address?.trim()) errors.address = 'Необходимо указать адрес';
+    }
+    if (stage === 'contact' || stage === 'all') {
+      if (!data.email?.trim() || !data.phone?.trim()) {
+        errors.contact = 'Необходимо заполнить поля';
+      }
+    }
     return errors;
+  }
+
+  validatePay(draft: Partial<ICustomer> = {}): CustomerErrors {
+    return this.validateData('pay', draft);
+  }
+
+  validateContacts(draft: Partial<ICustomer> = {}): CustomerErrors {
+    return this.validateData('contact', draft);
   }
 
   // Сброс данных клиента

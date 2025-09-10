@@ -33,6 +33,7 @@ export interface IProductData {
   getSelectedProduct(): IProduct | null;
   setSelectedProduct(product: IProduct): void;
   setSelectedProductId(id: string): void;
+  getProductById(id: string): IProduct | null;
 }
 
 export interface IBasketModel {
@@ -49,7 +50,9 @@ export interface IBasketModel {
 export interface ICustomerModel {
   updateData(data: Partial<ICustomer>): void;
   getData(): ICustomer;
-  validateData(): CustomerErrors;
+  validateData(stage?: 'pay' | 'contact' | 'all', draft?: Partial<ICustomer>): CustomerErrors;
+  validatePay(draft?: Partial<ICustomer>): CustomerErrors;
+  validateContacts(draft?: Partial<ICustomer>): CustomerErrors;
   clearData(): void;
 }
 
@@ -64,55 +67,66 @@ export interface IApi {
 }
 
 // Интерфейсы представления
-// Каталог (список карточек)
+// Каталог (контейнер для карточек)
 export interface ICatalogView {
-  render(list: CatalogMain[]): void;
-  onOpenDetails(handler: (productId: string) => void): void;
+  setCatalog(items: HTMLElement[]): void;
 }
 
-// Корзина
+// Корзина (вид)
 export interface IBasketView {
-  render(lines: BasketItemSummary[], total: number, count: number): void;
-  onRemove(handler: (productId: string) => void): void;
+  setItems(items: HTMLElement[]): void;
+  setTotal(value: number): void;
   onCheckout(handler: () => void): void;
+  getElement(): HTMLElement;
 }
 
+// Шапка
+export interface IHeaderView {
+  setCounter(value: number): void;
+}
 
-// Модалка оплаты/адреса
+// Модалка товара (preview)
+export interface IProductModalView {
+  render(product: IProduct): HTMLElement;
+  onAddItem(handler: () => void): void;
+  setPurchaseState(inBasket: boolean, isAvailable: boolean): void;
+  getElement(): HTMLElement;
+}
+
+// Форма: способ оплаты + адрес
 export interface ICheckoutPayView {
-  setData(data: CheckoutPayModalData): void;
-  onSubmit(handler: (data: CheckoutPayModalData) => void): void;
+  render(data: CheckoutPayModalData, errors?: Record<string, string>): void;
+  onPaymentSelect(handler: (payment: 'online' | 'cash') => void): void;
+  onAddressChange(handler: (value: string) => void): void;
+  onSubmit(handler: () => void): void;
+  getElement(): HTMLFormElement;
 }
 
-// Модалка контактов
+// Форма: контакты (email + phone)
 export interface ICheckoutContactView {
-  setData(data: CheckoutContactModalData): void;
+  render(data: CheckoutContactModalData, errors: Record<string, string>): void;
+  onChange(handler: (data: CheckoutContactModalData) => void): void;
   onSubmit(handler: (data: CheckoutContactModalData) => void): void;
+  getElement(): HTMLFormElement;
 }
 
 // События (общий словарь для взаимодействия между модулями)
 export const Events = {
-  // данные
   CatalogUpdated: 'catalog:updated',
   PreviewChanged: 'catalog:previewChanged',
-  BasketChanged: 'basket:changed',
-  CustomerUpdated: 'customer:updated',
-  OrderCreated: 'order:created',
-  OrderError: 'order:error',
 
-  // UI
-  HeaderBasketClick: 'header:basketClick',
   GalleryCardClick: 'gallery:cardClick',
-  ModalClose: 'modal:close',
+  BasketChanged: 'basket:changed',
   BasketAddItem: 'basket:addItem',
   BasketRemoveItem: 'basket:removeItem',
   BasketCheckout: 'basket:checkout',
-  CheckoutPaymentSelect: 'checkout:paymentSelect',
-  CheckoutPayValidate: 'checkout:payValidate',
-  CheckoutPaySubmit: 'checkout:paySubmit',
-  CheckoutContactValidate: 'checkout:contactValidate',
+  BasketOpen: 'basket:open',
+
+  CustomerUpdated: 'customer:updated',
   CheckoutContactSubmit: 'checkout:contactSubmit',
-  SuccessContinue: 'success:continue',
+
+  ModalOpen: 'modal:open',
+  ModalClose: 'modal:close',
 } as const;
 
 // Ответ списков

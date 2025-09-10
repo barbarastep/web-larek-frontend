@@ -1,39 +1,23 @@
+import { IProduct } from "../types";
+import { ensureElement } from "../utils/utils";
+
 // Базовый класс для карточек товара. Содержит только общие части: заголовок и цену
 // Другие представления (каталог, корзина, модалка) будут расширять этот класс
-
-import { IProduct } from "../types";
-
 export class ProductCardBase {
-  // Основные элементы карточки
   private root: HTMLElement;
   private titleElement: HTMLElement;
   private priceElement: HTMLElement;
 
-  // Данные продукта (сохраняются после рендера)
-  private product: IProduct | null = null;
-
-  // Инициализация с готовым DOM-узлом
   constructor(root: HTMLElement) {
     this.root = root;
-    this.titleElement = this.root.querySelector('.card__title') as HTMLElement;
-    this.priceElement = this.root.querySelector('.card__price') as HTMLElement;
+    this.titleElement = ensureElement<HTMLElement>('.card__title', this.root);
+    this.priceElement = ensureElement<HTMLElement>('.card__price', this.root);
   }
 
-  // Заполняет карточку данными и возвращает DOM-элемент
+  // Отрисовывает текущие данные товара и возвращает DOM-узел
   render(product: IProduct): HTMLElement {
-    this.product = product;
-    this.titleElement.textContent = product.title;
-    if (product.price === null) {
-      this.priceElement.textContent = 'Бесценно';
-    } else {
-      this.priceElement.textContent = `${product.price} синапсов`;
-    }
+    this.setTitleAndPrice(product.title, product.price);
     return this.root;
-  }
-
-  // Возвращает id продукта
-  getId(): string | null {
-    return this.product ? this.product.id : null;
   }
 
   // Возвращает DOM-элемент карточки
@@ -41,7 +25,14 @@ export class ProductCardBase {
     return this.root;
   }
 
-  protected getProduct(): IProduct | null {
-    return this.product;
+  // Форматирование цены: «Бесценно» или «N синапсов»
+  protected formatPrice(price: number | null): string {
+    return price == null ? 'Бесценно' : `${price} синапсов`;
+  }
+
+  // Утилита для наследников: единообразно проставляет заголовок и цену
+  protected setTitleAndPrice(title: string, price: number | null): void {
+    this.titleElement.textContent = title;
+    this.priceElement.textContent = this.formatPrice(price);
   }
 }
